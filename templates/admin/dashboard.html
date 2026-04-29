@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý - Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <!-- Welcome Header -->
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-4 mb-6">
+        <div>
+            <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">
+                Bảng điều khiển <span class="text-primary">Quản lý</span>
+            </h1>
+            <p class="text-muted">
+                Quản lý câu hỏi, bài thi và theo dõi kết quả học sinh.
+            </p>
+        </div>
+        <div class="d-flex gap-3">
+            <a href="{{ url_for('admin.questions_create') }}" class="btn btn-outline">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                Thêm câu hỏi
+            </a>
+            <a href="{{ url_for('admin.quizzes_create') }}" class="btn btn-primary">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>
+                Tạo bài thi
+            </a>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="card stat-card">
+            <div class="stat-icon blue">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <p class="stat-label">Câu hỏi</p>
+            <p class="stat-value">{{ total_questions }}</p>
+        </div>
+        <div class="card stat-card">
+            <div class="stat-icon purple">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            </div>
+            <p class="stat-label">Bài thi</p>
+            <p class="stat-value">{{ total_quizzes }}</p>
+        </div>
+        <div class="card stat-card">
+            <div class="stat-icon amber">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            </div>
+            <p class="stat-label">Học sinh</p>
+            <p class="stat-value">{{ total_students }}</p>
+        </div>
+        <div class="card stat-card">
+            <div class="stat-icon emerald">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+            </div>
+            <p class="stat-label">Điểm TB</p>
+            <p class="stat-value">{{ avg_score }}</p>
+        </div>
+    </div>
+
+    <!-- Quick Navigation -->
+    <div class="grid grid-cols-3 gap-4 mb-6">
+        <a href="{{ url_for('admin.questions_list') }}" class="card" style="text-decoration: none; display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 48px; height: 48px; border-radius: 1rem; background: rgba(99, 102, 241, 0.1); display: flex; align-items: center; justify-content: center; color: var(--color-primary);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            </div>
+            <div>
+                <h3 style="font-size: 1rem; color: var(--color-text-primary);">Ngân hàng câu hỏi</h3>
+                <p class="text-muted fs-sm">Quản lý {{ total_questions }} câu hỏi</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </a>
+        <a href="{{ url_for('admin.quizzes_list') }}" class="card" style="text-decoration: none; display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 48px; height: 48px; border-radius: 1rem; background: rgba(236, 72, 153, 0.1); display: flex; align-items: center; justify-content: center; color: var(--color-secondary);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+            </div>
+            <div>
+                <h3 style="font-size: 1rem; color: var(--color-text-primary);">Quản lý bài thi</h3>
+                <p class="text-muted fs-sm">{{ total_quizzes }} bài thi đang hoạt động</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </a>
+        <a href="{{ url_for('admin.results') }}" class="card" style="text-decoration: none; display: flex; align-items: center; gap: 1rem;">
+            <div style="width: 48px; height: 48px; border-radius: 1rem; background: rgba(16, 185, 129, 0.1); display: flex; align-items: center; justify-content: center; color: var(--color-success);">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+            </div>
+            <div>
+                <h3 style="font-size: 1rem; color: var(--color-text-primary);">Kết quả thi</h3>
+                <p class="text-muted fs-sm">{{ total_results }} lượt thi</p>
+            </div>
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-text-secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto;"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </a>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 2fr 1fr; gap: 3rem;">
+        <!-- Recent Results -->
+        <div>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 style="font-size: 1.5rem;">Kết quả gần đây</h2>
+                <a href="{{ url_for('admin.results') }}" class="text-primary fw-bold fs-sm" style="text-decoration: none;">
+                    Xem tất cả →
+                </a>
+            </div>
+            
+            {% if recent_results %}
+                <div class="table-container">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Học sinh</th>
+                                <th>Bài thi</th>
+                                <th>Điểm</th>
+                                <th>Thời gian</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in recent_results %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <div style="width: 32px; height: 32px; border-radius: 50%; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">
+                                                {{ result.display_student_name[0] }}
+                                            </div>
+                                            <span>{{ result.display_student_name }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ result.quiz.title[:30] }}{% if result.quiz.title|length > 30 %}...{% endif %}</td>
+                                    <td>
+                                        <span class="badge {% if result.score_percent >= 80 %}badge-success{% elif result.score_percent >= 50 %}badge-medium{% else %}badge-danger{% endif %}">
+                                            {{ result.score_percent|round(1) }}%
+                                        </span>
+                                    </td>
+                                    <td class="text-muted">{{ result.submitted_at.strftime('%d/%m %H:%M') if result.submitted_at else '-' }}</td>
+                                    <td>
+                                        <a href="{{ url_for('admin.result_detail', result_id=result.id) }}" class="btn btn-ghost btn-sm">
+                                            Chi tiết
+                                        </a>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-state-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                    </div>
+                    <h3>Chưa có kết quả</h3>
+                    <p>Học sinh chưa làm bài thi nào.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Sidebar -->
+        <div>
+            <!-- Recent Quizzes -->
+            <div class="card mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h3 style="font-size: 1rem;">Bài thi mới nhất</h3>
+                    <a href="{{ url_for('admin.quizzes_create') }}" class="btn btn-ghost btn-sm text-primary">
+                        + Tạo mới
+                    </a>
+                </div>
+                {% if recent_quizzes %}
+                    {% for quiz in recent_quizzes %}
+                        <div class="d-flex align-items-center gap-3 mb-3" style="padding-bottom: 0.75rem; border-bottom: 1px solid var(--color-surface-low);">
+                            <div style="width: 40px; height: 40px; border-radius: 0.75rem; background: {% if quiz.is_published %}var(--color-success){% else %}var(--color-text-secondary){% endif %}; opacity: 0.1; display: flex; align-items: center; justify-content: center;">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="{% if quiz.is_published %}var(--color-success){% else %}var(--color-text-secondary){% endif %}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path></svg>
+                            </div>
+                            <div style="flex: 1;">
+                                <p style="font-size: 0.875rem; font-weight: 600; margin-bottom: 0.125rem;">{{ quiz.title[:25] }}{% if quiz.title|length > 25 %}...{% endif %}</p>
+                                <p class="text-muted fs-xs">{{ quiz.questions.count() }} câu • {{ quiz.time_limit_minutes }} phút</p>
+                            </div>
+                            <span class="badge {% if quiz.is_published %}badge-success{% else %}badge-medium{% endif %}">
+                                {% if quiz.is_published %}Hoạt động{% else %}Tắt{% endif %}
+                            </span>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center fs-sm">Chưa có bài thi nào.</p>
+                {% endif %}
+            </div>
+
+            <!-- Admin Actions -->
+            {% if current_user.is_admin() %}
+            <div class="card" style="background: var(--color-surface-low); border: none;">
+                <h3 style="font-size: 1rem; margin-bottom: 1rem;">Quản trị viên</h3>
+                <a href="{{ url_for('admin.users_list') }}" class="btn btn-outline btn-sm w-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    Quản lý người dùng
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

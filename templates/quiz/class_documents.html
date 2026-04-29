@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Tài liệu lớp học{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <a href="{{ url_for('quiz.library') }}" class="btn btn-ghost mb-4">← Quay lại thư viện</a>
+    <h1 class="mb-4">Tài liệu lớp học</h1>
+
+    {% if classes %}
+        {% for classroom in classes %}
+            <div class="card mb-4">
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                    <div>
+                        <h3 class="mb-1">{{ classroom.name }}</h3>
+                        <p class="text-muted mb-0">Giáo viên: {{ classroom.teacher.display_name }}</p>
+                    </div>
+                    <span class="badge badge-primary">{{ docs_by_class.get(classroom.id, []) | length }} tài liệu</span>
+                </div>
+
+                {% set documents = docs_by_class.get(classroom.id, []) %}
+                {% if documents %}
+                    <ul class="mb-0">
+                        {% for doc in documents %}
+                            <li class="mb-2">
+                                <a href="{{ doc.file_url }}" target="_blank">{{ doc.title }}</a>
+                                <span class="text-muted">({{ doc.file_type or 'file' }})</span>
+                                <span class="text-muted">• {{ doc.uploaded_at.strftime('%d/%m/%Y') }}</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted mb-0">Chưa có tài liệu nào cho lớp này.</p>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
+        <div class="card">
+            <p class="text-muted mb-0">Bạn chưa tham gia lớp nào hoặc chưa được duyệt.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

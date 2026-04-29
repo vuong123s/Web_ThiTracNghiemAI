@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <a href="{{ url_for('teacher.classes_list') }}" class="btn btn-ghost mb-4">← Quay lại lớp học</a>
+    <h1 class="mb-4">{{ title }}</h1>
+
+    <div class="card" style="max-width: 760px;">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="mb-4">
+                <label class="form-label">Tên lớp</label>
+                {{ form.name(class="form-control") }}
+            </div>
+            <div class="mb-4">
+                <label class="form-label">Mô tả</label>
+                {{ form.description(class="form-control", rows="4") }}
+            </div>
+            <button class="btn btn-primary" type="submit">Lưu lớp học</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

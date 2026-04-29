@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý lớp học{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Lớp học của tôi</h1>
+            <p class="text-muted">Tạo lớp, quản lý mã join code, duyệt thành viên và tài liệu.</p>
+        </div>
+        <a href="{{ url_for('teacher.classes_create') }}" class="btn btn-primary">+ Tạo lớp học</a>
+    </div>
+
+    <div class="card">
+        {% if classes %}
+            <div class="table-container">
+                <table class="table" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tên lớp</th>
+                            <th>Join code</th>
+                            <th>Sĩ số duyệt</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for c in classes %}
+                            <tr>
+                                <td>{{ c.id }}</td>
+                                <td>{{ c.name }}</td>
+                                <td><strong>{{ c.join_code }}</strong></td>
+                                <td>{{ c.memberships.filter_by(status='approved').count() }}</td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a class="btn btn-outline btn-sm" href="{{ url_for('teacher.class_members', class_id=c.id) }}">Thành viên</a>
+                                        <a class="btn btn-outline btn-sm" href="{{ url_for('teacher.classes_edit', class_id=c.id) }}">Sửa</a>
+                                        <form method="POST" action="{{ url_for('teacher.classes_delete', class_id=c.id) }}">
+                                            <button class="btn btn-danger btn-sm" onclick="return confirm('Xóa lớp học này?')">Xóa</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">Bạn chưa tạo lớp học nào.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

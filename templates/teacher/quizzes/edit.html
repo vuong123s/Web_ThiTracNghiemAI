@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+
+{% block title %}Sửa đề thi{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <a href="{{ url_for('teacher.quizzes_list') }}" class="btn btn-ghost mb-4">← Quay lại danh sách đề thi</a>
+    <h1 class="mb-4">Sửa đề thi: {{ quiz.title }}</h1>
+
+    <div class="grid" style="grid-template-columns: 1.2fr 1fr; gap: 2rem;">
+        <div class="card">
+            <form method="POST">
+                {{ form.hidden_tag() }}
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="form-label">Tiêu đề</label>
+                        {{ form.title(class="form-control") }}
+                    </div>
+                    <div>
+                        <label class="form-label">Lớp học</label>
+                        {{ form.class_id(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Mô tả</label>
+                    {{ form.description(class="form-control", rows="3") }}
+                </div>
+
+                <div class="grid grid-cols-3 gap-4 mb-4">
+                    <div>
+                        <label class="form-label">Thời gian (phút)</label>
+                        {{ form.time_limit_minutes(class="form-control") }}
+                    </div>
+                    <div>
+                        <label class="form-label">Mở thi</label>
+                        {{ form.scheduled_at(class="form-control") }}
+                    </div>
+                    <div>
+                        <label class="form-label">Đóng thi</label>
+                        {{ form.expires_at(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <label class="d-flex align-items-center gap-2">{{ form.is_shuffled() }} Trộn câu hỏi</label>
+                    <label class="d-flex align-items-center gap-2">{{ form.shuffle_options() }} Trộn đáp án</label>
+                    <label class="d-flex align-items-center gap-2">{{ form.allow_retake() }} Cho phép làm lại</label>
+                    <label class="d-flex align-items-center gap-2">{{ form.is_published() }} Công khai</label>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Thêm câu hỏi từ ngân hàng</label>
+                    <div style="max-height: 240px; overflow-y:auto; border:1px solid #ddd; padding:10px;">
+                        {% for q in bank_questions %}
+                            <label class="d-flex align-items-start gap-2 mb-2">
+                                <input type="checkbox" name="bank_question_ids" value="{{ q.id }}">
+                                <span>[{{ q.type }}][{{ q.difficulty }}] {{ q.text[:120] }}{% if q.text|length > 120 %}...{% endif %}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <button class="btn btn-primary" type="submit">Lưu thay đổi</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h3 class="mb-3">Câu hỏi trong đề</h3>
+            {% if quiz_questions %}
+                {% for q in quiz_questions %}
+                    <div class="card mb-3" style="padding: 0.75rem;">
+                        <p class="mb-2"><strong>Câu {{ loop.index }}:</strong> {{ q.text[:120] }}{% if q.text|length > 120 %}...{% endif %}</p>
+                        <form method="POST" action="{{ url_for('teacher.quiz_question_media_update', id=quiz.id, question_id=q.id) }}">
+                            <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                            <div class="mb-2">
+                                <label class="form-label">Image URL</label>
+                                <input class="form-control" type="url" name="image_url" value="{{ q.image_url or '' }}" placeholder="https://...">
+                            </div>
+                            <div class="mb-2">
+                                <label class="form-label">YouTube URL</label>
+                                <input class="form-control" type="url" name="youtube_url" value="{{ q.youtube_url or '' }}" placeholder="https://www.youtube.com/watch?v=...">
+                            </div>
+                            <button class="btn btn-outline btn-sm" type="submit">Lưu media câu hỏi</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Đề thi chưa có câu hỏi.</p>
+            {% endif %}
+
+            <form class="mt-4" method="POST" action="{{ url_for('teacher.quizzes_regenerate', id=quiz.id) }}">
+                <div class="mb-2">
+                    <label class="form-label">Tạo random lại số câu</label>
+                    <input class="form-control" name="random_count" type="number" min="1" value="{{ quiz_questions|length if quiz_questions else 5 }}">
+                </div>
+                <button class="btn btn-outline" onclick="return confirm('Tạo lại câu hỏi cho đề này?')">Regenerate</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

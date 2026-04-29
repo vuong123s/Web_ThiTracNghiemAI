@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+
+{% block title %}Kết quả bài làm{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <div class="card mb-4">
+        {% if quiz.brand_logo_url %}
+            <img src="{{ quiz.brand_logo_url }}" alt="quiz-logo" style="max-height: 56px; margin-bottom: 0.75rem;">
+        {% endif %}
+        <h1 class="mb-2" style="{% if quiz.brand_color %}color: {{ quiz.brand_color }};{% endif %}">{{ quiz.title }}</h1>
+        <p><strong>Thí sinh:</strong> {{ result.display_student_name }} ({{ result.display_student_email }})</p>
+        <p><strong>Điểm:</strong> {{ result.total_score }}/{{ result.max_score }} ({{ "%.1f"|format(result.score_percent) }}%)</p>
+        <p><strong>Trạng thái:</strong> {{ result.status }}</p>
+        <p><strong>Nộp lúc:</strong> {{ result.submitted_at.strftime('%d/%m/%Y %H:%M') if result.submitted_at else '-' }}</p>
+    </div>
+
+    {% for answer in user_answers %}
+        <div class="card mb-3">
+            <p><strong>Câu {{ loop.index }}:</strong> {{ answer.question.text }}</p>
+            <p><strong>Loại:</strong> {{ answer.question.type }}</p>
+            {% if answer.question.image_url %}
+                <img src="{{ answer.question.image_url }}" alt="question-image" style="max-width: 360px; margin-bottom: 0.75rem;">
+            {% endif %}
+            {% if answer.question.youtube_url %}
+                <p><a href="{{ answer.question.youtube_url }}" target="_blank">Video YouTube</a></p>
+            {% endif %}
+
+            {% if answer.question.type == 'essay' %}
+                <p><strong>Bài làm:</strong></p>
+                <div style="padding: 10px; border: 1px solid #ddd; border-radius: 8px;">{{ answer.essay_answer or '(Trống)' }}</div>
+                {% if answer.essay_image_url %}
+                    <p class="mt-2"><a href="{{ answer.essay_image_url }}" target="_blank">Xem ảnh đính kèm</a></p>
+                {% endif %}
+                {% if answer.feedback %}
+                    <p class="mt-2"><strong>Nhận xét giáo viên:</strong> {{ answer.feedback }}</p>
+                {% endif %}
+                <p><strong>Điểm câu này:</strong> {{ answer.score_awarded }}</p>
+            {% else %}
+                {% set selected_labels = [] %}
+                {% if answer.option %}
+                    {% set _ = selected_labels.append(answer.option.label) %}
+                {% elif answer.essay_answer %}
+                    {% for raw_id in answer.essay_answer.split(',') %}
+                        {% set opt = answer.question.options.filter_by(id=raw_id|int).first() %}
+                        {% if opt %}
+                            {% set _ = selected_labels.append(opt.label) %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+                <p><strong>Bạn chọn:</strong> {{ selected_labels|join(', ') if selected_labels else '-' }}</p>
+                <p><strong>Kết quả:</strong> {% if answer.is_correct %}Đúng{% else %}Sai{% endif %}</p>
+                <p><strong>Giải thích:</strong> {{ answer.question.get_explanation() }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+
+    <a class="btn btn-outline" href="{{ url_for('quiz.history') if current_user.is_authenticated else url_for('index') }}">Xem lịch sử bài làm</a>
+</div>
+{% endblock %}
+

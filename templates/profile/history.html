@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block title %}Lịch sử làm bài{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <div class="mb-6">
+        <a href="{{ url_for('profile.view') }}" class="text-muted d-flex align-items-center gap-2 mb-3" style="text-decoration: none;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            Quay lại hồ sơ
+        </a>
+        <h1 style="font-size: 2rem;">Lịch sử làm bài</h1>
+    </div>
+
+    {% if results.items %}
+        <div class="card">
+            <div class="table-wrap">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Bài thi</th>
+                            <th>Lần</th>
+                            <th>Điểm</th>
+                            <th>Tỉ lệ</th>
+                            <th>Trạng thái</th>
+                            <th>Nộp lúc</th>
+                            <th>Chi tiết</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results.items %}
+                            <tr>
+                                <td>{{ (results.page - 1) * results.per_page + loop.index }}</td>
+                                <td>{{ result.quiz.title }}</td>
+                                <td>{{ result.attempt_no }}</td>
+                                <td>{{ result.total_score }}/{{ result.max_score }}</td>
+                                <td>{{ result.score_percent }}%</td>
+                                <td>{{ result.status }}</td>
+                                <td>{{ result.submitted_at.strftime('%d/%m/%Y %H:%M') if result.submitted_at else '-' }}</td>
+                                <td>
+                                    <a href="{{ url_for('quiz.result', result_id=result.id) }}" class="btn btn-outline btn-sm">
+                                        Xem
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        {% if results.pages > 1 %}
+            <div class="d-flex justify-content-center mt-4 gap-2">
+                {% if results.has_prev %}
+                    <a href="{{ url_for('profile.history', page=results.prev_num) }}" class="btn btn-ghost">← Trước</a>
+                {% endif %}
+                <span class="btn btn-outline">Trang {{ results.page }}/{{ results.pages }}</span>
+                {% if results.has_next %}
+                    <a href="{{ url_for('profile.history', page=results.next_num) }}" class="btn btn-ghost">Sau →</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% else %}
+        <div class="card text-center py-6">
+            <p class="text-muted mb-4">Bạn chưa có lịch sử bài làm.</p>
+            <a href="{{ url_for('quiz.library') }}" class="btn btn-primary">Vào thư viện bài thi</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

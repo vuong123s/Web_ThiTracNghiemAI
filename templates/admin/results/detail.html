@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Chi tiết bài làm{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <a href="{{ url_for('admin.results') }}" class="btn btn-ghost mb-4">← Quay lại danh sách bài làm</a>
+    <h1 class="mb-4">Bài làm #{{ result.id }} - {{ result.quiz.title }}</h1>
+
+    <div class="card mb-4">
+        <p><strong>Học sinh:</strong> {{ result.display_student_name }} ({{ result.display_student_email }})</p>
+        <p><strong>Điểm:</strong> {{ result.total_score }}/{{ result.max_score }} ({{ "%.1f"|format(result.score_percent) }}%)</p>
+        <p><strong>Trạng thái:</strong> {{ result.status }}</p>
+    </div>
+
+    {% for answer in user_answers %}
+        <div class="card mb-3">
+            <p><strong>Câu hỏi:</strong> {{ answer.question.text }}</p>
+            <p><strong>Loại:</strong> {{ answer.question.type }}</p>
+
+            {% if answer.question.type == 'essay' %}
+                <p><strong>Bài làm:</strong></p>
+                <div style="padding:10px; border:1px solid #ddd; border-radius:8px;">{{ answer.essay_answer or '(Trống)' }}</div>
+                {% if answer.essay_image_url %}
+                    <p class="mt-2"><a href="{{ answer.essay_image_url }}" target="_blank">Xem ảnh đính kèm</a></p>
+                {% endif %}
+                <hr>
+                <form method="POST" action="{{ url_for('admin.grade_essay', result_id=result.id, answer_id=answer.id) }}">
+                    {{ grading_forms[answer.id].hidden_tag() }}
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="form-label">Điểm chấm</label>
+                            {{ grading_forms[answer.id].score_awarded(class="form-control", value=answer.score_awarded) }}
+                        </div>
+                        <div>
+                            <label class="form-label">Nhận xét</label>
+                            {{ grading_forms[answer.id].feedback(class="form-control", rows="2") }}
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-3" type="submit">Lưu chấm điểm tự luận</button>
+                </form>
+            {% else %}
+                <p><strong>Đáp án đã chọn:</strong> {{ answer.option.label if answer.option else '-' }}</p>
+                <p><strong>Kết quả:</strong> {% if answer.is_correct %}Đúng{% else %}Sai{% endif %}</p>
+                <p><strong>Giải thích:</strong> {{ answer.question.get_explanation() }}</p>
+            {% endif %}
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}

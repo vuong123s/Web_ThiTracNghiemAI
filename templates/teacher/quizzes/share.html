@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Chia sẻ đề thi{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <a href="{{ url_for('teacher.quizzes_list') }}" class="btn btn-ghost mb-4">← Quay lại đề thi</a>
+    <h1 class="mb-4">Chia sẻ đề thi: {{ quiz.title }}</h1>
+
+    <div class="grid" style="grid-template-columns: 1fr 320px; gap: 2rem;">
+        <div class="card">
+            <p class="text-muted">Link chia sẻ có token riêng:</p>
+            <div class="mb-3" style="word-break: break-all; font-weight: 600;">{{ share_url }}</div>
+            <button class="btn btn-primary" onclick="navigator.clipboard.writeText('{{ share_url }}')">Copy link</button>
+        </div>
+        <div class="card text-center">
+            <p class="text-muted">QR Code</p>
+            <img src="{{ qr_url }}" alt="QR code share link" style="max-width: 260px; width: 100%;">
+        </div>
+    </div>
+</div>
+{% endblock %}
+

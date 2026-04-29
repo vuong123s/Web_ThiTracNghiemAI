@@ -1,0 +1,643 @@
+{% extends 'base.html' %}
+
+{% block title %}NineGPT - Tạo câu hỏi bằng AI{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <a href="{{ url_for('teacher.questions_list') }}" class="btn btn-outline-secondary mb-4">← Quay lại ngân hàng</a>
+
+    <div class="row g-4">
+        <!-- ========== FORM SECTION (Trái) ========== -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">🤖 NineGPT - Tạo câu hỏi bằng AI</h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-4">
+                        Nhập chủ đề, chọn AI provider, rồi nhấn "Tạo câu hỏi" để sinh dữ liệu.
+                        Xem preview bên phải, chỉnh sửa, rồi lưu vào ngân hàng hoặc tạo quiz.
+                    </p>
+
+                    <!-- Trạng thái AI Providers -->
+                    <div class="alert alert-info mb-3" id="provider-status-container">
+                        <strong class="d-block mb-2">Trạng thái AI Providers:</strong>
+                        <div class="small">
+                            <div class="mb-1">
+                                <span id="openai-status-icon">⏳</span>
+                                <span id="openai-status-text">Đang kiểm tra...</span>
+                            </div>
+                            <div>
+                                <span id="gemini-status-icon">⏳</span>
+                                <span id="gemini-status-text">Đang kiểm tra...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form -->
+                    <form id="ai-form" class="d-grid gap-3">
+                        {{ form.hidden_tag() }}
+
+                        <div>
+                            <label class="form-label">{{ form.provider.label.text }}</label>
+                            {{ form.provider(class="form-select", id="id_provider") }}
+                            <small class="text-muted">Chọn AI provider từ danh sách</small>
+                        </div>
+
+                        <div>
+                            <label class="form-label">{{ form.topic.label.text }}</label>
+                            {{ form.topic(class="form-control", id="id_topic", placeholder="VD: Lịch sử Việt Nam thời Lý") }}
+                            <small class="text-danger" id="topic-error" style="display:none;"></small>
+                        </div>
+
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <label class="form-label">{{ form.difficulty.label.text }}</label>
+                                {{ form.difficulty(class="form-select", id="id_difficulty") }}
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label">{{ form.question_count.label.text }}</label>
+                                {{ form.question_count(class="form-control", id="id_question_count", min=1, max=10) }}
+                                <small class="text-muted">1-10 câu</small>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="form-label">{{ form.category.label.text }}</label>
+                            {{ form.category(class="form-control", id="id_category", placeholder="Để trống = dùng chủ đề") }}
+                        </div>
+
+                        <div class="d-grid gap-2 pt-2">
+                            <button type="submit" id="submit-btn" class="btn btn-primary btn-lg">
+                                <span id="btn-text">✨ Tạo câu hỏi bằng AI</span>
+                                <span id="btn-spinner" style="display:none;">
+                                    <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+                                    Đang xử lý...
+                                </span>
+                            </button>
+                            <a href="{{ url_for('teacher.questions_list') }}" class="btn btn-outline-secondary">Hủy</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== PREVIEW SECTION (Phải) ========== -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📋 Preview Câu hỏi (<span id="question-count">0</span>)</h5>
+                    <div class="form-check text-white m-0">
+                        <input class="form-check-input" type="checkbox" id="select-all-checkbox" disabled>
+                        <label class="form-check-label" for="select-all-checkbox">Chọn tất cả</label>
+                    </div>
+                </div>
+                <div class="card-body" style="max-height: 700px; overflow-y: auto;">
+                    <!-- Loading Spinner -->
+                    <div id="loading-spinner" class="text-center py-5" style="display: none;">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">Đang tạo...</span>
+                        </div>
+                        <p class="text-muted">🔄 Đang gọi AI, vui lòng chờ (30-60 giây)...</p>
+                    </div>
+
+                    <!-- Error Alert -->
+                    <div id="error-alert" class="alert alert-danger" style="display: none;"></div>
+
+                    <!-- Questions Container -->
+                    <div id="questions-container">
+                        <p class="text-muted text-center py-5">Chưa có câu hỏi. Nhập thông tin ở bên trái rồi nhấn "Tạo câu hỏi"</p>
+                    </div>
+
+                    <!-- Bulk Actions -->
+                    <div id="bulk-actions" style="display: none; margin-top: 20px; border-top: 1px solid #dee2e6; padding-top: 15px;">
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-success" id="save-selected-btn">
+                                💾 Lưu các câu đã chọn
+                            </button>
+                            <button type="button" class="btn btn-info" id="create-quiz-btn">
+                                📝 Tạo bài kiểm tra
+                            </button>
+                        </div>
+                        <p id="selected-count" class="text-muted small mt-2 text-center">Chưa chọn câu hỏi nào</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== EDIT MODAL ========== -->
+<div class="modal fade" id="editQuestionModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title">✏️ Chỉnh sửa câu hỏi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">Nội dung câu hỏi</label>
+                    <textarea class="form-control" id="edit-question-text" rows="3"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Loại câu hỏi</label>
+                    <select class="form-select" id="edit-question-type">
+                        <option value="single">Chọn 1 đáp án</option>
+                        <option value="multiple">Chọn nhiều đáp án</option>
+                        <option value="essay">Tự luận</option>
+                    </select>
+                </div>
+
+                <div id="edit-options-container" class="mb-3"></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Thẻ (tags)</label>
+                    <input type="text" class="form-control" id="edit-question-tags" placeholder="Cách nhau bằng dấu phẩy">
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Giải thích đáp án</label>
+                    <textarea class="form-control" id="edit-question-explanation" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="save-edit-btn">💾 Lưu thay đổi</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ========== TOAST NOTIFICATIONS ========== -->
+<div class="position-fixed bottom-0 end-0 p-3" style="z-index: 11; pointer-events: none;">
+    <div id="toast-container"></div>
+</div>
+
+<script>
+    /**
+     * NineGPT Manager - Quản lý danh sách câu hỏi AI
+     * Gửi request AJAX JSON để sinh câu hỏi, hiển thị, chỉnh sửa, xóa
+     */
+    class NineGPTManager {
+        constructor() {
+            this.questions = [];
+            this.selectedIndices = new Set();
+            this.editingIndex = null;
+            this.formData = {};
+            
+            this.initElements();
+            this.bindEvents();
+            this.checkProviderStatus();
+        }
+
+        initElements() {
+            this.form = document.getElementById('ai-form');
+            this.submitBtn = document.getElementById('submit-btn');
+            this.btnText = document.getElementById('btn-text');
+            this.btnSpinner = document.getElementById('btn-spinner');
+            
+            this.loadingSpinner = document.getElementById('loading-spinner');
+            this.errorAlert = document.getElementById('error-alert');
+            this.questionsContainer = document.getElementById('questions-container');
+            this.questionCount = document.getElementById('question-count');
+            this.selectAllCheckbox = document.getElementById('select-all-checkbox');
+            this.bulkActions = document.getElementById('bulk-actions');
+            this.selectedCount = document.getElementById('selected-count');
+            
+            this.saveSelectedBtn = document.getElementById('save-selected-btn');
+            this.createQuizBtn = document.getElementById('create-quiz-btn');
+            
+            this.editModal = new bootstrap.Modal(document.getElementById('editQuestionModal'));
+            this.editQuestionText = document.getElementById('edit-question-text');
+            this.editQuestionType = document.getElementById('edit-question-type');
+            this.editOptionsContainer = document.getElementById('edit-options-container');
+            this.editQuestionTags = document.getElementById('edit-question-tags');
+            this.editQuestionExplanation = document.getElementById('edit-question-explanation');
+            this.saveEditBtn = document.getElementById('save-edit-btn');
+        }
+
+        bindEvents() {
+            this.form.addEventListener('submit', (e) => this.handleFormSubmit(e));
+            this.selectAllCheckbox.addEventListener('change', () => this.toggleSelectAll());
+            this.saveSelectedBtn.addEventListener('click', () => this.handleSaveSelected());
+            this.createQuizBtn.addEventListener('click', () => this.handleCreateQuiz());
+            this.saveEditBtn.addEventListener('click', () => this.handleSaveEdit());
+        }
+
+        async checkProviderStatus() {
+            try {
+                const response = await fetch('{{ url_for("teacher.api_ai_provider_status") }}');
+                const status = await response.json();
+                
+                this.updateProviderDisplay('openai', status.openai);
+                this.updateProviderDisplay('gemini', status.gemini);
+                this.updateSubmitButton(status);
+            } catch (error) {
+                console.error('❌ Lỗi kiểm tra provider:', error);
+            }
+        }
+
+        updateProviderDisplay(provider, status) {
+            const icon = document.getElementById(`${provider}-status-icon`);
+            const text = document.getElementById(`${provider}-status-text`);
+            
+            icon.textContent = status.ready ? '✓' : '✗';
+            icon.style.color = status.ready ? 'green' : 'red';
+            text.textContent = status.status;
+        }
+
+        updateSubmitButton(status) {
+            const providerSelect = document.getElementById('id_provider');
+            const updateStatus = () => {
+                const provider = providerSelect.value;
+                const isReady = provider === 'openai' ? status.openai.ready : status.gemini.ready;
+                this.submitBtn.disabled = !isReady;
+            };
+            
+            updateStatus();
+            providerSelect.addEventListener('change', updateStatus);
+        }
+
+        async handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const providerSelect = document.getElementById('id_provider');
+            const topicInput = document.getElementById('id_topic');
+            const categoryInput = document.getElementById('id_category');
+            const difficultySelect = document.getElementById('id_difficulty');
+            const countInput = document.getElementById('id_question_count');
+            
+            this.formData = {
+                provider: providerSelect.value,
+                topic: topicInput.value.trim(),
+                category: categoryInput.value.trim() || topicInput.value.trim(),
+                difficulty: difficultySelect.value,
+                question_count: parseInt(countInput.value)
+            };
+            
+            // Validation
+            if (!this.formData.topic) {
+                this.showToast('Vui lòng nhập chủ đề', 'warning');
+                return;
+            }
+            
+            // Show loading
+            this.loadingSpinner.style.display = 'block';
+            this.errorAlert.style.display = 'none';
+            this.questionsContainer.innerHTML = '';
+            this.questions = [];
+            this.selectedIndices.clear();
+            this.bulkActions.style.display = 'none';
+            this.btnText.style.display = 'none';
+            this.btnSpinner.style.display = 'inline';
+            this.submitBtn.disabled = true;
+            
+            try {
+                // Gửi JSON request (không phải FormData)
+                const response = await fetch('{{ url_for("teacher.questions_ai_generate") }}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(this.formData)
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                
+                const result = await response.json();
+                this.loadingSpinner.style.display = 'none';
+                this.btnText.style.display = 'inline';
+                this.btnSpinner.style.display = 'none';
+                this.submitBtn.disabled = false;
+                
+                if (result.success && result.questions && result.questions.length > 0) {
+                    this.renderQuestions(result.questions);
+                    this.showToast(`✓ Đã sinh ${result.questions.length} câu hỏi`, 'success');
+                } else {
+                    this.showError(result.error || 'Không có dữ liệu trả về từ AI');
+                }
+            } catch (error) {
+                this.loadingSpinner.style.display = 'none';
+                this.btnText.style.display = 'inline';
+                this.btnSpinner.style.display = 'none';
+                this.submitBtn.disabled = false;
+                this.showError(`❌ Lỗi: ${error.message}`);
+                console.error('Error:', error);
+            }
+        }
+
+        showError(message) {
+            this.errorAlert.textContent = message;
+            this.errorAlert.style.display = 'block';
+            this.showToast(message, 'danger');
+        }
+
+        renderQuestions(questions) {
+            this.questions = questions;
+            this.selectedIndices.clear();
+            this.updateQuestionCount();
+            
+            if (questions.length === 0) {
+                this.questionsContainer.innerHTML = '<p class="text-muted text-center py-5">Không có câu hỏi nào</p>';
+                this.bulkActions.style.display = 'none';
+                return;
+            }
+            
+            this.questionsContainer.innerHTML = questions
+                .map((q, idx) => this.createQuestionCard(q, idx))
+                .join('');
+            
+            this.selectAllCheckbox.disabled = false;
+            this.bulkActions.style.display = 'block';
+            
+            // Bind events
+            questions.forEach((_, idx) => {
+                const checkbox = document.getElementById(`checkbox-${idx}`);
+                const editBtn = document.getElementById(`edit-btn-${idx}`);
+                const deleteBtn = document.getElementById(`delete-btn-${idx}`);
+                
+                if (checkbox) checkbox.addEventListener('change', () => this.toggleSelectQuestion(idx));
+                if (editBtn) editBtn.addEventListener('click', () => this.openEditModal(idx));
+                if (deleteBtn) deleteBtn.addEventListener('click', () => this.deleteQuestion(idx));
+            });
+        }
+
+        createQuestionCard(q, idx) {
+            const isSelected = this.selectedIndices.has(idx);
+            
+            return `
+                <div class="card mb-3 ${isSelected ? 'border-primary border-2' : ''}">
+                    <div class="card-body">
+                        <div class="d-flex gap-2 mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="checkbox-${idx}">
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="card-title mb-1">Câu ${idx + 1}</h6>
+                                <small class="text-muted">
+                                    ${q.type === 'single' ? '✓ Chọn 1 đáp án' : q.type === 'multiple' ? '✓✓ Chọn nhiều' : '✍️ Tự luận'}
+                                    | ${q.difficulty === 'easy' ? 'Dễ' : q.difficulty === 'medium' ? 'Trung bình' : 'Khó'}
+                                </small>
+                            </div>
+                        </div>
+
+                        <p class="mb-3">${this.escapeHtml(q.text)}</p>
+
+                        ${q.type !== 'essay' ? `
+                            <div class="mb-3">
+                                ${q.options ? q.options.map((opt, i) => `
+                                    <div class="form-check ${opt.is_correct ? 'bg-success bg-opacity-10 border border-success rounded p-2 mb-2' : 'mb-2'}">
+                                        <input class="form-check-input" type="${q.type === 'single' ? 'radio' : 'checkbox'}" 
+                                               id="option-${idx}-${i}" ${opt.is_correct ? 'checked' : ''} disabled>
+                                        <label class="form-check-label" for="option-${idx}-${i}">
+                                            <strong>${String.fromCharCode(65 + i)}.</strong> ${this.escapeHtml(opt.text)}
+                                            ${opt.is_correct ? '<span class="badge bg-success ms-2">✓</span>' : ''}
+                                        </label>
+                                    </div>
+                                `).join('') : ''}
+                            </div>
+                        ` : ''}
+
+                        ${q.tags ? `<p class="small mb-1"><strong>Tags:</strong> ${this.escapeHtml(q.tags)}</p>` : ''}
+                        ${q.explanation ? `<p class="small text-muted"><strong>Giải thích:</strong> ${this.escapeHtml(q.explanation)}</p>` : ''}
+
+                        <div class="mt-3 d-flex gap-2 flex-wrap">
+                            <button type="button" class="btn btn-sm btn-warning" id="edit-btn-${idx}">
+                                ✏️ Sửa
+                            </button>
+                            <button type="button" class="btn btn-sm btn-danger" id="delete-btn-${idx}">
+                                🗑️ Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        openEditModal(idx) {
+            this.editingIndex = idx;
+            const q = this.questions[idx];
+            
+            this.editQuestionText.value = q.text;
+            this.editQuestionType.value = q.type;
+            this.editQuestionTags.value = q.tags || '';
+            this.editQuestionExplanation.value = q.explanation || '';
+            
+            if (q.type !== 'essay' && q.options) {
+                this.editOptionsContainer.innerHTML = q.options.map((opt, i) => `
+                    <div class="input-group mb-2">
+                        <span class="input-group-text">${String.fromCharCode(65 + i)}.</span>
+                        <input type="text" class="form-control" value="${this.escapeHtml(opt.text)}" 
+                               data-option-idx="${i}" data-field="text">
+                        <div class="input-group-text">
+                            <input class="form-check-input" type="${q.type === 'single' ? 'radio' : 'checkbox'}" 
+                                   name="correct" ${opt.is_correct ? 'checked' : ''} 
+                                   data-option-idx="${i}" data-field="is_correct">
+                            <label class="form-check-label ms-2">Đúng</label>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            this.editModal.show();
+        }
+
+        handleSaveEdit() {
+            if (this.editingIndex === null) return;
+            
+            const q = this.questions[this.editingIndex];
+            q.text = this.editQuestionText.value;
+            q.tags = this.editQuestionTags.value;
+            q.explanation = this.editQuestionExplanation.value;
+            
+            if (q.type !== 'essay' && q.options) {
+                q.options.forEach((opt, i) => {
+                    const textInput = document.querySelector(`[data-option-idx="${i}"][data-field="text"]`);
+                    const correctCheckbox = document.querySelector(`[data-option-idx="${i}"][data-field="is_correct"]`);
+                    if (textInput) opt.text = textInput.value;
+                    if (correctCheckbox) opt.is_correct = correctCheckbox.checked;
+                });
+            }
+            
+            this.editModal.hide();
+            this.renderQuestions(this.questions);
+            this.showToast('✓ Đã lưu thay đổi', 'success');
+        }
+
+        deleteQuestion(idx) {
+            if (!confirm('Xóa câu hỏi này?')) return;
+            this.questions.splice(idx, 1);
+            this.selectedIndices.delete(idx);
+            
+            const newSelected = new Set();
+            for (let i of this.selectedIndices) {
+                if (i > idx) newSelected.add(i - 1);
+                else if (i < idx) newSelected.add(i);
+            }
+            this.selectedIndices = newSelected;
+            this.renderQuestions(this.questions);
+        }
+
+        toggleSelectQuestion(idx) {
+            if (this.selectedIndices.has(idx)) {
+                this.selectedIndices.delete(idx);
+            } else {
+                this.selectedIndices.add(idx);
+            }
+            this.updateSelectedCount();
+        }
+
+        toggleSelectAll() {
+            if (this.selectAllCheckbox.checked) {
+                this.selectedIndices = new Set(this.questions.map((_, i) => i));
+            } else {
+                this.selectedIndices.clear();
+            }
+            this.updateSelectedCount();
+            this.renderQuestions(this.questions);
+        }
+
+        updateQuestionCount() {
+            this.questionCount.textContent = this.questions.length;
+        }
+
+        updateSelectedCount() {
+            const count = this.selectedIndices.size;
+            this.selectedCount.textContent = count === 0 
+                ? 'Chưa chọn câu hỏi nào' 
+                : `Đã chọn ${count}/${this.questions.length} câu`;
+            this.selectAllCheckbox.indeterminate = count > 0 && count < this.questions.length;
+            this.selectAllCheckbox.checked = count === this.questions.length;
+        }
+
+        async handleSaveSelected() {
+            if (this.selectedIndices.size === 0) {
+                this.showToast('Vui lòng chọn ít nhất 1 câu hỏi', 'warning');
+                return;
+            }
+            
+            const selectedQuestions = Array.from(this.selectedIndices).map(i => this.questions[i]);
+            this.saveSelectedBtn.disabled = true;
+            
+            try {
+                const response = await fetch('{{ url_for("teacher.save_ai_questions_batch") }}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        questions: selectedQuestions,
+                        category: this.formData.category,
+                        difficulty: this.formData.difficulty
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    this.showToast(`✓ Đã lưu ${result.saved_count} câu hỏi`, 'success');
+                    const newQuestions = this.questions.filter((_, i) => !this.selectedIndices.has(i));
+                    this.questions = newQuestions;
+                    this.selectedIndices.clear();
+                    this.renderQuestions(this.questions);
+                } else {
+                    this.showToast(`✗ Lỗi: ${result.error}`, 'danger');
+                }
+            } catch (error) {
+                this.showToast('Lỗi: ' + error.message, 'danger');
+            } finally {
+                this.saveSelectedBtn.disabled = false;
+            }
+        }
+
+        async handleCreateQuiz() {
+            if (this.selectedIndices.size === 0) {
+                this.showToast('Vui lòng chọn ít nhất 1 câu hỏi', 'warning');
+                return;
+            }
+            
+            const defaultName = `${this.formData.topic} - ${new Date().toLocaleDateString('vi-VN')}`;
+            const quizName = prompt('Tên bài kiểm tra:', defaultName);
+            if (!quizName) return;
+            
+            const selectedQuestions = Array.from(this.selectedIndices).map(i => this.questions[i]);
+            this.createQuizBtn.disabled = true;
+            
+            try {
+                const response = await fetch('{{ url_for("teacher.create_quiz_from_ai") }}', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        quiz_name: quizName,
+                        questions: selectedQuestions
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    this.showToast('✓ Tạo bài kiểm tra thành công', 'success');
+                    setTimeout(() => {
+                        window.location.href = result.redirect_url;
+                    }, 1500);
+                } else {
+                    this.showToast(`✗ Lỗi: ${result.error}`, 'danger');
+                }
+            } catch (error) {
+                this.showToast('Lỗi: ' + error.message, 'danger');
+            } finally {
+                this.createQuizBtn.disabled = false;
+            }
+        }
+
+        showToast(message, type = 'info') {
+            const toastId = 'toast-' + Date.now();
+            const bgClass = {
+                'success': 'bg-success',
+                'danger': 'bg-danger',
+                'warning': 'bg-warning',
+                'info': 'bg-info'
+            }[type] || 'bg-info';
+            
+            const titleText = {
+                'success': 'Thành công',
+                'danger': 'Lỗi',
+                'warning': 'Cảnh báo',
+                'info': 'Thông báo'
+            }[type] || 'Thông báo';
+            
+            const toastHtml = `
+                <div id="${toastId}" class="toast" role="alert">
+                    <div class="toast-header ${bgClass} text-white">
+                        <strong class="me-auto">${titleText}</strong>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${this.escapeHtml(message)}
+                    </div>
+                </div>
+            `;
+            
+            const container = document.getElementById('toast-container');
+            container.insertAdjacentHTML('beforeend', toastHtml);
+            
+            const toastEl = document.getElementById(toastId);
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
+            
+            toastEl.addEventListener('hidden.bs.toast', () => toastEl.remove());
+        }
+
+        escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+    }
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', () => {
+        window.nineGPTManager = new NineGPTManager();
+    });
+</script>
+{% endblock %}

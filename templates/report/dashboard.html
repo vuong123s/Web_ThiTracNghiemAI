@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block title %}Báo cáo giáo viên{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Báo cáo lớp học</h2>
+            <p class="text-muted mb-0">Theo dõi bảng điểm và tỉ lệ đúng/sai theo câu hỏi.</p>
+        </div>
+        <a
+            class="btn btn-outline"
+            href="{{ url_for('report.export_report', class_id=selected_class_id, quiz_id=selected_quiz_id) }}"
+        >
+            Export Excel
+        </a>
+    </div>
+
+    <form method="GET" class="card p-3 mb-4">
+        <div class="d-grid gap-3" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+            <div>
+                <label class="form-label">Lớp học</label>
+                <select class="form-control" name="class_id">
+                    <option value="">Tất cả lớp</option>
+                    {% for c in classes %}
+                        <option value="{{ c.id }}" {% if selected_class_id == c.id %}selected{% endif %}>
+                            {{ c.name }} ({{ c.join_code }})
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Đề thi</label>
+                <select class="form-control" name="quiz_id">
+                    <option value="">Tất cả đề thi</option>
+                    {% for q in quizzes %}
+                        <option value="{{ q.id }}" {% if selected_quiz_id == q.id %}selected{% endif %}>
+                            {{ q.title }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="d-flex align-items-end">
+                <button class="btn btn-primary w-100" type="submit">Lọc dữ liệu</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="grid grid-cols-2 gap-4 mb-4">
+        <div class="card">
+            <h4 class="mb-3">Bảng điểm tổng hợp</h4>
+            <div class="table-wrap">
+                <table class="table table-striped align-middle">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Học sinh</th>
+                            <th>Email</th>
+                            <th>Lần làm</th>
+                            <th>TB (%)</th>
+                            <th>Cao nhất (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if scoreboard %}
+                            {% for row in scoreboard %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ row.name }}</td>
+                                    <td>{{ row.email }}</td>
+                                    <td>{{ row.attempts }}</td>
+                                    <td>{{ row.avg_score }}</td>
+                                    <td>{{ row.best_score }}</td>
+                                </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="6" class="text-center text-muted">Chưa có dữ liệu</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card">
+            <h4 class="mb-3">
+                {% if selected_quiz %}
+                    Thống kê câu hỏi: {{ selected_quiz.title }}
+                {% else %}
+                    Chọn đề thi để xem thống kê câu hỏi
+                {% endif %}
+            </h4>
+            {% if selected_quiz and question_stats %}
+                <canvas id="questionStatsChart" height="180"></canvas>
+            {% else %}
+                <p class="text-muted mb-0">Chưa có dữ liệu thống kê.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card">
+        <h4 class="mb-3">Danh sách bài làm gần đây</h4>
+        <div class="table-wrap">
+            <table class="table table-striped align-middle">
+                <thead>
+                    <tr>
+                        <th>Đề thi</th>
+                        <th>Học sinh</th>
+                        <th>Điểm</th>
+                        <th>Tỉ lệ</th>
+                        <th>Trạng thái</th>
+                        <th>Nộp lúc</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if submissions %}
+                        {% for row in submissions %}
+                            <tr>
+                                <td>{{ row.quiz.title }}</td>
+                                <td>{{ row.display_student_name }}</td>
+                                <td>{{ row.total_score }}/{{ row.max_score }}</td>
+                                <td>{{ row.score_percent }}%</td>
+                                <td>{{ row.status }}</td>
+                                <td>{{ row.submitted_at.strftime('%d/%m/%Y %H:%M') if row.submitted_at else '-' }}</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr><td colspan="6" class="text-center text-muted">Chưa có bài làm</td></tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if selected_quiz and question_stats %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script>
+    const labels = {{ chart_labels | tojson }};
+    const correct = {{ chart_correct | tojson }};
+    const wrong = {{ chart_wrong | tojson }};
+
+    const ctx = document.getElementById('questionStatsChart');
+    if (ctx) {
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: 'Đúng',
+                        data: correct,
+                        backgroundColor: '#10b981',
+                    },
+                    {
+                        label: 'Sai',
+                        data: wrong,
+                        backgroundColor: '#ef4444',
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+            },
+        });
+    }
+</script>
+{% endif %}
+{% endblock %}

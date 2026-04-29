@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <h1 class="mb-4">Student Dashboard</h1>
+
+    <div class="grid grid-cols-4 gap-4 mb-6">
+        <div class="card">
+            <p class="text-muted fs-sm">Completed</p>
+            <h2>{{ completed_count }}</h2>
+        </div>
+        <div class="card">
+            <p class="text-muted fs-sm">Average</p>
+            <h2>{{ "%.1f"|format(avg_score * 10) }}%</h2>
+        </div>
+        <div class="card">
+            <p class="text-muted fs-sm">Highest</p>
+            <h2>{{ "%.1f"|format(highest_score * 10) }}%</h2>
+        </div>
+        <div class="card">
+            <p class="text-muted fs-sm">Available quizzes</p>
+            <h2>{{ total_quizzes }}</h2>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-2 gap-4">
+        <div class="card">
+            <h3 class="mb-3">Recent Results</h3>
+            {% if recent_results %}
+                <ul>
+                    {% for result in recent_results %}
+                        <li>
+                            {{ result.quiz.title }} - {{ "%.1f"|format(result.score_percent) }}%
+                            {% if result.submitted_at %}
+                                ({{ result.submitted_at.strftime('%d/%m/%Y %H:%M') }})
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No attempts yet.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3 class="mb-3">Available Quizzes</h3>
+            {% if available_quizzes %}
+                <ul>
+                    {% for quiz in available_quizzes %}
+                        <li>
+                            <a href="{{ url_for('quiz.start_quiz', quiz_id=quiz.id) }}">
+                                {{ quiz.title }}
+                            </a>
+                            - {{ quiz.time_limit_minutes }} minutes
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted">No active quizzes.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+

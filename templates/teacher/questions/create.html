@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+
+{% block title %}Tạo câu hỏi ngân hàng{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <a href="{{ url_for('teacher.questions_list') }}" class="btn btn-ghost mb-4">← Quay lại ngân hàng câu hỏi</a>
+    <h1 class="mb-4">Tạo câu hỏi mới</h1>
+
+    <div class="card">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-4">
+                <label class="form-label">Nội dung câu hỏi</label>
+                {{ form.text(class="form-control", rows="4") }}
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="form-label">Loại câu hỏi</label>
+                    {{ form.type(class="form-control", id="question-type") }}
+                </div>
+                <div>
+                    <label class="form-label">Chủ đề</label>
+                    {{ form.category(class="form-control") }}
+                </div>
+                <div>
+                    <label class="form-label">Độ khó</label>
+                    {{ form.difficulty(class="form-control") }}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Tags</label>
+                {{ form.tags(class="form-control", placeholder="vd: lich-su,chuong-1") }}
+            </div>
+
+            <div id="objective-fields">
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="form-label">Đáp án A</label>
+                        {{ form.option_a(class="form-control") }}
+                    </div>
+                    <div>
+                        <label class="form-label">Đáp án B</label>
+                        {{ form.option_b(class="form-control") }}
+                    </div>
+                    <div>
+                        <label class="form-label">Đáp án C</label>
+                        {{ form.option_c(class="form-control") }}
+                    </div>
+                    <div>
+                        <label class="form-label">Đáp án D</label>
+                        {{ form.option_d(class="form-control") }}
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Đáp án đúng</label>
+                    {{ form.correct_answers(class="form-control", placeholder="Single: A | Multiple: A,C") }}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Giải thích đáp án</label>
+                {{ form.explanation(class="form-control", rows="3") }}
+            </div>
+
+            <button class="btn btn-primary" type="submit">Lưu câu hỏi</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const typeSelect = document.getElementById('question-type');
+        const objectiveFields = document.getElementById('objective-fields');
+        const toggle = () => {
+            objectiveFields.style.display = typeSelect.value === 'essay' ? 'none' : 'block';
+        };
+        typeSelect.addEventListener('change', toggle);
+        toggle();
+    })();
+</script>
+{% endblock %}
+

@@ -1,0 +1,165 @@
+{% extends 'base.html' %}
+
+{% block title %}Bảng xếp hạng{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <div class="text-center mb-6">
+        <h1 style="font-size: 2.5rem; margin-bottom: 0.5rem;">🏆 Bảng Xếp Hạng</h1>
+        <p class="text-muted">Top 10 học sinh có điểm trung bình cao nhất</p>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="d-flex justify-content-center mb-6">
+        <div class="d-flex gap-2" style="background: var(--color-surface-low); padding: 0.25rem; border-radius: 0.5rem;">
+            <a href="{{ url_for('leaderboard') }}" 
+               class="btn {% if not quiz_id %}btn-primary{% else %}btn-ghost{% endif %}" style="padding: 0.5rem 1rem;">
+                Tổng điểm
+            </a>
+            {% for quiz in quizzes %}
+                <a href="{{ url_for('leaderboard', quiz_id=quiz.id) }}" 
+                   class="btn {% if quiz_id == quiz.id %}btn-primary{% else %}btn-ghost{% endif %}" style="padding: 0.5rem 1rem; white-space: nowrap;">
+                    {{ quiz.title[:20] }}{% if quiz.title|length > 20 %}...{% endif %}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if leaderboard %}
+        <!-- Top 3 Podium -->
+        <div class="d-flex justify-content-center align-items-end gap-4 mb-6">
+            <!-- 2nd Place -->
+            {% if leaderboard|length >= 2 %}
+                <div class="text-center" style="width: 180px;">
+                    <div style="width: 80px; height: 80px; border-radius: 50%; background: linear-gradient(135deg, #C0C0C0, #E8E8E8); color: #333; display: flex; align-items: center; justify-content: center; font-size: 2rem; font-weight: 800; margin: 0 auto 1rem; border: 4px solid #C0C0C0;">
+                        {{ leaderboard[1].name[0] }}
+                    </div>
+                    <p class="fw-bold mb-0">{{ leaderboard[1].name }}</p>
+                    <p class="text-muted fs-sm mb-2">{{ leaderboard[1].total_quizzes }} bài thi</p>
+                    <div style="background: linear-gradient(180deg, #C0C0C0, #A0A0A0); color: white; padding: 2rem 1rem 1rem; border-radius: 0.5rem 0.5rem 0 0; position: relative;">
+                        <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #C0C0C0; color: white; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">2</span>
+                        <p style="font-size: 1.5rem; font-weight: 800; margin: 0;">{{ "%.1f"|format(leaderboard[1].avg_score) }}</p>
+                        <p class="fs-sm mb-0">điểm TB</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- 1st Place -->
+            {% if leaderboard|length >= 1 %}
+                <div class="text-center" style="width: 200px;">
+                    <div style="position: relative; margin-bottom: 1rem;">
+                        <div style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: 2rem;">👑</div>
+                        <div style="width: 100px; height: 100px; border-radius: 50%; background: linear-gradient(135deg, #FFD700, #FFA500); color: #333; display: flex; align-items: center; justify-content: center; font-size: 2.5rem; font-weight: 800; margin: 20px auto 0; border: 4px solid #FFD700; box-shadow: 0 4px 20px rgba(255, 215, 0, 0.5);">
+                            {{ leaderboard[0].name[0] }}
+                        </div>
+                    </div>
+                    <p class="fw-bold mb-0" style="font-size: 1.125rem;">{{ leaderboard[0].name }}</p>
+                    <p class="text-muted fs-sm mb-2">{{ leaderboard[0].total_quizzes }} bài thi</p>
+                    <div style="background: linear-gradient(180deg, #FFD700, #CC9900); color: white; padding: 3rem 1rem 1rem; border-radius: 0.5rem 0.5rem 0 0; position: relative;">
+                        <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #FFD700; color: #333; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">1</span>
+                        <p style="font-size: 2rem; font-weight: 800; margin: 0;">{{ "%.1f"|format(leaderboard[0].avg_score) }}</p>
+                        <p class="fs-sm mb-0">điểm TB</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <!-- 3rd Place -->
+            {% if leaderboard|length >= 3 %}
+                <div class="text-center" style="width: 180px;">
+                    <div style="width: 70px; height: 70px; border-radius: 50%; background: linear-gradient(135deg, #CD7F32, #E8A060); color: white; display: flex; align-items: center; justify-content: center; font-size: 1.75rem; font-weight: 800; margin: 0 auto 1rem; border: 4px solid #CD7F32;">
+                        {{ leaderboard[2].name[0] }}
+                    </div>
+                    <p class="fw-bold mb-0">{{ leaderboard[2].name }}</p>
+                    <p class="text-muted fs-sm mb-2">{{ leaderboard[2].total_quizzes }} bài thi</p>
+                    <div style="background: linear-gradient(180deg, #CD7F32, #A05A20); color: white; padding: 1.5rem 1rem 1rem; border-radius: 0.5rem 0.5rem 0 0; position: relative;">
+                        <span style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: #CD7F32; color: white; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 800;">3</span>
+                        <p style="font-size: 1.25rem; font-weight: 800; margin: 0;">{{ "%.1f"|format(leaderboard[2].avg_score) }}</p>
+                        <p class="fs-sm mb-0">điểm TB</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- Rest of Leaderboard -->
+        {% if leaderboard|length > 3 %}
+            <div class="card" style="max-width: 800px; margin: 0 auto;">
+                <table class="table" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="width: 60px;">Hạng</th>
+                            <th>Học sinh</th>
+                            <th style="text-align: center;">Số bài thi</th>
+                            <th style="text-align: center;">Điểm TB</th>
+                            <th style="text-align: center;">Điểm cao nhất</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in leaderboard[3:] %}
+                            <tr {% if current_user.is_authenticated and entry.user_id == current_user.id %}style="background: rgba(59, 130, 246, 0.1);"{% endif %}>
+                                <td>
+                                    <span style="font-weight: 700; color: var(--color-text-muted);">{{ loop.index + 3 }}</span>
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+                                            {{ entry.name[0] }}
+                                        </div>
+                                        <span class="fw-bold">{{ entry.name }}</span>
+                                        {% if current_user.is_authenticated and entry.user_id == current_user.id %}
+                                            <span class="badge badge-info">Bạn</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td style="text-align: center;">{{ entry.total_quizzes }}</td>
+                                <td style="text-align: center;">
+                                    <span class="fw-bold text-primary">{{ "%.1f"|format(entry.avg_score) }}</span>
+                                </td>
+                                <td style="text-align: center;">{{ "%.1f"|format(entry.highest_score) }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+
+        <!-- Current User Position (if not in top 10) -->
+        {% if current_user.is_authenticated and current_user.is_student() %}
+            {% set user_in_top = false %}
+            {% for entry in leaderboard %}
+                {% if entry.user_id == current_user.id %}
+                    {% set user_in_top = true %}
+                {% endif %}
+            {% endfor %}
+            {% if not user_in_top and user_position %}
+                <div class="card mt-6" style="max-width: 800px; margin: 2rem auto 0; background: rgba(59, 130, 246, 0.1); border: 2px solid var(--color-primary);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center gap-3">
+                            <span style="font-size: 1.5rem; font-weight: 800; color: var(--color-primary);">#{{ user_position.rank }}</span>
+                            <div style="width: 48px; height: 48px; border-radius: 50%; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.25rem;">
+                                {{ current_user.full_name[0] }}
+                            </div>
+                            <div>
+                                <p class="fw-bold mb-0">{{ current_user.full_name }}</p>
+                                <p class="text-muted fs-sm mb-0">Vị trí của bạn</p>
+                            </div>
+                        </div>
+                        <div class="text-right">
+                            <p class="fw-bold text-primary mb-0" style="font-size: 1.5rem;">{{ "%.1f"|format(user_position.avg_score) }}</p>
+                            <p class="text-muted fs-sm mb-0">điểm trung bình</p>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        {% endif %}
+
+    {% else %}
+        <div class="card text-center py-6" style="max-width: 600px; margin: 0 auto;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" class="text-muted mb-4" style="margin: 0 auto;"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg>
+            <p class="text-muted mb-4">Chưa có dữ liệu xếp hạng!</p>
+            {% if current_user.is_authenticated and current_user.is_student() %}
+                <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Làm bài thi ngay</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

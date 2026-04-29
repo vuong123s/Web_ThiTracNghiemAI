@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Chỉnh sửa tài khoản{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <a href="{{ url_for('admin.users_list') }}" class="btn btn-ghost mb-4">← Quay lại danh sách</a>
+    <h1 class="mb-4">Chỉnh sửa tài khoản</h1>
+
+    <div class="card" style="max-width: 600px;">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="mb-4">
+                <label class="form-label">Họ và tên</label>
+                {{ form.full_name(class="form-control") }}
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Email</label>
+                {{ form.email(class="form-control") }}
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Vai trò</label>
+                {{ form.role(class="form-control") }}
+                {% if user.id == current_user.id %}
+                    <p class="text-warning fs-sm mt-1">⚠️ Cẩn thận khi thay đổi vai trò của chính mình!</p>
+                {% endif %}
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Mật khẩu mới (để trống nếu không đổi)</label>
+                {{ form.password(class="form-control") }}
+            </div>
+
+            <button class="btn btn-primary" type="submit">Lưu thay đổi</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

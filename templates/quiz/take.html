@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Làm bài thi{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            {% if quiz.brand_logo_url %}
+                <img src="{{ quiz.brand_logo_url }}" alt="quiz-logo" style="max-height: 56px; margin-bottom: 0.75rem;">
+            {% endif %}
+            <h1 style="{% if quiz.brand_color %}color: {{ quiz.brand_color }};{% endif %}">{{ quiz.title }}</h1>
+            <p class="text-muted">Thí sinh: {{ submission.display_student_name }} ({{ submission.display_student_email }})</p>
+        </div>
+        <div class="card" style="padding: 0.75rem 1rem;">
+            <strong>Thời gian còn lại: <span id="timer">{{ "%02d"|format(duration_seconds // 60) }}:{{ "%02d"|format(duration_seconds % 60) }}</span></strong>
+        </div>
+    </div>
+
+    <form id="quiz-form" method="POST" enctype="multipart/form-data" action="{{ url_for('quiz.submit_quiz', quiz_id=quiz.id) }}">
+        {% for q in questions %}
+            <div class="card mb-4">
+                <p><strong>Câu {{ loop.index }} ({{ q.points }} điểm)</strong> - {{ q.type }}</p>
+                <p>{{ q.text }}</p>
+                {% if q.image_url %}
+                    <img src="{{ q.image_url }}" alt="question-image" style="max-width: 400px;">
+                {% endif %}
+                {% if q.youtube_url %}
+                    <div class="mb-2">
+                        <a href="{{ q.youtube_url }}" target="_blank">Mở video YouTube</a>
+                    </div>
+                    <div class="ratio ratio-16x9 mb-2" style="max-width: 560px;">
+                        <iframe src="{{ q.youtube_url|replace('watch?v=', 'embed/') }}" title="YouTube video" allowfullscreen></iframe>
+                    </div>
+                {% endif %}
+
+                {% if q.type == 'essay' %}
+                    <div class="mb-3">
+                        <label class="form-label">Câu trả lời tự luận</label>
+                        <textarea class="form-control" rows="5" name="essay_{{ q.id }}"></textarea>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Ảnh đính kèm (tuỳ chọn)</label>
+                        <input type="file" class="form-control" name="essay_image_{{ q.id }}" accept=".png,.jpg,.jpeg,.gif">
+                    </div>
+                {% elif q.type == 'single' %}
+                    {% for opt in ordered_options[q.id] %}
+                        <label class="d-flex align-items-start gap-2 mb-2">
+                            <input type="radio" name="question_{{ q.id }}" value="{{ opt.id }}">
+                            <span><strong>{{ opt.label }}.</strong> {{ opt.text }}</span>
+                        </label>
+                    {% endfor %}
+                {% else %}
+                    {% for opt in ordered_options[q.id] %}
+                        <label class="d-flex align-items-start gap-2 mb-2">
+                            <input type="checkbox" name="question_{{ q.id }}" value="{{ opt.id }}">
+                            <span><strong>{{ opt.label }}.</strong> {{ opt.text }}</span>
+                        </label>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        {% endfor %}
+
+        <button class="btn btn-primary btn-lg" type="submit" onclick="return confirm('Xác nhận nộp bài?')">Nộp bài</button>
+    </form>
+</div>
+
+<script>
+    (function () {
+        let remaining = {{ duration_seconds|int }};
+        const timerEl = document.getElementById('timer');
+        const form = document.getElementById('quiz-form');
+
+        const pad = (n) => String(n).padStart(2, '0');
+        const tick = () => {
+            remaining -= 1;
+            if (remaining < 0) {
+                form.submit();
+                return;
+            }
+            const mm = Math.floor(remaining / 60);
+            const ss = remaining % 60;
+            timerEl.textContent = `${pad(mm)}:${pad(ss)}`;
+        };
+
+        setInterval(tick, 1000);
+    })();
+</script>
+{% endblock %}
+

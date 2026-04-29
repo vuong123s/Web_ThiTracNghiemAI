@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuizFlow - Nền tảng thi trắc nghiệm trực tuyến</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <!-- Navigation -->
+        <header class="navbar glass" style="height: 80px; min-height: 0; padding-top: 12px; padding-bottom: 12px;">
+        <div class="container navbar-inner" style="height: 48px; gap: 2.5rem; padding: 0 2.5rem; align-items: center;">
+            <a href="{{ url_for('index') }}" class="nav-brand" style="gap: 1.3rem; align-items: center;">
+                <div class="nav-icon" style="width: 28px; height: 28px; min-width: 28px; min-height: 28px; border-radius: 8px; box-shadow: 0 2px 8px 0 rgba(99,102,241,0.10);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                </div>
+                <span class="nav-title" style="font-size: 1.1rem; font-weight: 800;">Quiz<span style="color: #6366F1;">Flow</span></span>
+            </a>
+
+            <nav class="nav-links desktop-nav" style="gap: 2.2rem; align-items: center;">
+                <a href="{{ url_for('index') }}" class="nav-link active" style="padding: 0.3rem 0.9rem; font-size: 0.97rem; border-radius: 1.1rem; font-weight: 600;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.2rem;"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    Home
+                </a>
+                <a href="{{ url_for('quiz.library') if current_user.is_authenticated else url_for('auth.login') }}" class="nav-link" style="padding: 0.3rem 0.9rem; font-size: 0.97rem; border-radius: 1.1rem; font-weight: 500;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.2rem;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                    Library
+                </a>
+                <a href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('auth.login') }}" class="nav-link" style="padding: 0.3rem 0.9rem; font-size: 0.97rem; border-radius: 1.1rem; font-weight: 500;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.2rem;"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Dashboard
+                </a>
+                <a href="#" class="nav-link" style="padding: 0.3rem 0.9rem; font-size: 0.97rem; border-radius: 1.1rem; font-weight: 500;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.2rem;"><path d="M8.21 13.89 7 23l9-4 9 4-1.21-9.12"></path><path d="M6 9a6 6 0 0 1 12 0c0 7-6 11-6 11S6 16 6 9Z"></path><circle cx="12" cy="9" r="2.5"></circle></svg>
+                    Leaderboard
+                </a>
+            </nav>
+
+            <div class="navbar-actions desktop-nav" style="gap: 1.7rem; align-items: center;">
+                <button type="button" class="nav-action-btn" aria-label="Search" style="width: 22px; height: 22px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                </button>
+                <button type="button" class="nav-action-btn nav-action-bell" aria-label="Notifications" style="width: 22px; height: 22px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .738-1.674C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
+                </button>
+                <span class="nav-divider" style="height: 1.1rem; margin: 0 0.4rem;"></span>
+                <a href="{{ url_for('auth.login') }}" class="nav-auth-link" style="font-size: 0.97rem; padding: 0.2rem 0.6rem; margin-right: 1.1rem;">Log in</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm" style="font-size: 0.97rem; padding: 0.3rem 1rem; border-radius: 1.1rem; font-weight: 700;">Get Started</a>
+            </div>
+
+            <button class="btn btn-ghost btn-icon mobile-menu" id="mobile-menu-btn" aria-label="Toggle menu" style="width: 28px; height: 28px;">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="mobile-menu-dropdown" id="mobile-menu" style="display: none;">
+        <div class="container py-4">
+            <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+            <a href="{{ url_for('quiz.library') if current_user.is_authenticated else url_for('auth.login') }}" class="nav-link">Library</a>
+            <a href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('auth.login') }}" class="nav-link">Dashboard</a>
+            <a href="#" class="nav-link">Leaderboard</a>
+            <div class="mt-4 d-flex gap-2">
+                <a href="{{ url_for('auth.login') }}" class="btn btn-ghost btn-sm">Log in</a>
+                <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Get Started</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section style="position: relative; padding: 6rem 2rem 8rem; overflow: hidden;">
+        <div style="position: absolute; inset: 0; z-index: -1; overflow: hidden;">
+            <div style="position: absolute; top: -120px; left: 50%; transform: translateX(-50%); width: 1000px; height: 600px; background: rgba(99,102,241,0.08); filter: blur(120px); border-radius: 9999px;"></div>
+            <div style="position: absolute; bottom: -220px; right: -120px; width: 600px; height: 600px; background: rgba(236,72,153,0.1); filter: blur(120px); border-radius: 9999px;"></div>
+        </div>
+
+        <div class="container" style="max-width: 1200px; margin: 0 auto;">
+            <div class="grid grid-cols-2 gap-4" style="align-items: center;">
+                <div>
+                    <div style="display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.5rem 1rem; border-radius: 9999px; background: rgba(99,102,241,0.1); color: var(--color-primary); font-size: 0.875rem; font-weight: 700; margin-bottom: 2rem;">
+                        <span>✨</span>
+                        <span>AI-Powered Learning Platform</span>
+                    </div>
+
+                    <h1 style="font-size: clamp(2.5rem, 5vw, 4.5rem); font-weight: 800; line-height: 1.1; margin-bottom: 1.5rem; letter-spacing: -0.03em;">
+                        Chinh phục mọi môn học với
+                        <span class="text-gradient"> Quiz thông minh</span>
+                    </h1>
+
+                    <p class="text-muted" style="font-size: 1.125rem; max-width: 560px; margin-bottom: 2rem;">
+                        Lộ trình học cá nhân hóa, phản hồi theo thời gian thực và thử thách tương tác giúp bạn học nhanh hơn, nhớ lâu hơn.
+                    </p>
+
+                    <div class="d-flex gap-3 flex-wrap" style="margin-bottom: 2rem;">
+                        <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-lg">Bắt đầu ngay</a>
+                        <a href="{{ url_for('auth.login') }}" class="btn btn-outline btn-lg">Xem demo</a>
+                    </div>
+
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="d-flex" style="margin-right: 0.5rem;">
+                            <img src="https://i.pravatar.cc/80?img=11" alt="User" referrerpolicy="no-referrer" style="width: 40px; height: 40px; border-radius: 9999px; border: 2px solid #fff; margin-right: -10px;">
+                            <img src="https://i.pravatar.cc/80?img=12" alt="User" referrerpolicy="no-referrer" style="width: 40px; height: 40px; border-radius: 9999px; border: 2px solid #fff; margin-right: -10px;">
+                            <img src="https://i.pravatar.cc/80?img=13" alt="User" referrerpolicy="no-referrer" style="width: 40px; height: 40px; border-radius: 9999px; border: 2px solid #fff; margin-right: -10px;">
+                            <div style="width: 40px; height: 40px; border-radius: 9999px; border: 2px solid #fff; background: var(--color-primary); color: white; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700;">+2k</div>
+                        </div>
+                        <div>
+                            <p style="font-size: 0.9rem; font-weight: 700;">2,400+ học sinh</p>
+                            <p class="text-muted fs-sm">tham gia tuần này</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="position: relative;">
+                    <div style="position: relative; z-index: 10; border-radius: 3rem; overflow: hidden; border: 8px solid #fff; box-shadow: 0 24px 60px rgba(99,102,241,0.25);">
+                        <img src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?auto=format&fit=crop&q=80&w=1200" alt="Students learning" referrerpolicy="no-referrer" style="display: block; width: 100%; height: auto;">
+                    </div>
+
+                    <div class="card" style="position: absolute; top: -24px; right: -24px; z-index: 11; background: rgba(255,255,255,0.75); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.65); padding: 1rem; min-width: 200px;">
+                        <p class="fs-xs text-muted" style="font-weight: 600;">Top Scorer</p>
+                        <p style="font-weight: 700;">Alex Johnson</p>
+                    </div>
+
+                    <div class="card" style="position: absolute; left: -24px; bottom: -24px; z-index: 11; background: rgba(255,255,255,0.75); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.65); padding: 1rem; min-width: 200px;">
+                        <p class="fs-xs text-muted" style="font-weight: 600;">Daily Streak</p>
+                        <p style="font-weight: 700;">15 Days</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section style="padding: 5rem 2rem;">
+        <div class="container" style="max-width: 1100px; margin: 0 auto;">
+            <div class="text-center mb-6">
+                <span class="badge badge-secondary" style="margin-bottom: 1rem;">Tính năng</span>
+                <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">Tất cả những gì bạn cần</h2>
+                <p class="text-muted" style="max-width: 500px; margin: 0 auto;">
+                    Công cụ toàn diện cho việc tạo và quản lý bài thi trực tuyến
+                </p>
+            </div>
+
+            <div class="grid grid-cols-3 gap-4">
+                <!-- Feature 1 -->
+                <div class="card" style="text-align: center; padding: 2rem;">
+                    <div style="width: 72px; height: 72px; border-radius: 1.5rem; background: linear-gradient(to bottom right, var(--color-primary), var(--color-secondary)); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: white;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                    </div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Ngân hàng câu hỏi</h3>
+                    <p class="text-muted">Quản lý hàng ngàn câu hỏi theo chủ đề và độ khó khác nhau.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="card" style="text-align: center; padding: 2rem;">
+                    <div style="width: 72px; height: 72px; border-radius: 1.5rem; background: linear-gradient(to bottom right, var(--color-secondary), var(--color-accent)); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: white;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    </div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Đồng hồ đếm ngược</h3>
+                    <p class="text-muted">Tính giờ tự động và nộp bài khi hết thời gian làm bài.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="card" style="text-align: center; padding: 2rem;">
+                    <div style="width: 72px; height: 72px; border-radius: 1.5rem; background: linear-gradient(to bottom right, var(--color-accent), var(--color-primary)); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: white;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                    </div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Chấm điểm tự động</h3>
+                    <p class="text-muted">Kết quả được tính ngay khi nộp bài với thống kê chi tiết.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="card" style="text-align: center; padding: 2rem;">
+                    <div style="width: 72px; height: 72px; border-radius: 1.5rem; background: rgba(99, 102, 241, 0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--color-primary);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                    </div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Đa vai trò</h3>
+                    <p class="text-muted">Hỗ trợ học sinh, giáo viên và quản trị viên với quyền hạn riêng.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="card" style="text-align: center; padding: 2rem;">
+                    <div style="width: 72px; height: 72px; border-radius: 1.5rem; background: rgba(236, 72, 153, 0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--color-secondary);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+                    </div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Giao diện responsive</h3>
+                    <p class="text-muted">Làm bài thi mọi lúc mọi nơi trên điện thoại, tablet hay máy tính.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="card" style="text-align: center; padding: 2rem;">
+                    <div style="width: 72px; height: 72px; border-radius: 1.5rem; background: rgba(245, 158, 11, 0.1); display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; color: var(--color-accent);">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    </div>
+                    <h3 style="font-size: 1.25rem; margin-bottom: 0.75rem;">Thống kê chi tiết</h3>
+                    <p class="text-muted">Theo dõi tiến độ học tập và phân tích điểm mạnh/yếu.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section style="padding: 5rem 2rem; background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); text-align: center;">
+        <div class="container" style="max-width: 700px; margin: 0 auto; color: white;">
+            <h2 style="font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">Sẵn sàng bắt đầu?</h2>
+            <p style="font-size: 1.125rem; opacity: 0.9; margin-bottom: 2rem;">
+                Đăng ký ngay hôm nay để trải nghiệm nền tảng thi trắc nghiệm hiện đại nhất.
+            </p>
+            <a href="{{ url_for('auth.register') }}" class="btn btn-lg" style="background: white; color: var(--color-primary); padding: 1rem 2.5rem; font-size: 1.125rem;">
+                Tạo tài khoản miễn phí
+            </a>
+        </div>
+    </section>
+
+    <!-- Footer (from logged-in page) -->
+    <footer class="footer">
+        <div class="container">
+            <div class="grid grid-cols-4 gap-4 mb-6">
+                <div>
+                    <div class="footer-brand">
+                        <div class="footer-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                        </div>
+                        <span class="footer-title">Quiz<span class="text-primary">Flow</span></span>
+                    </div>
+                    <p class="footer-desc">
+                        Nền tảng thi trắc nghiệm trực tuyến hiện đại, giúp học sinh và giáo viên quản lý việc học tập hiệu quả.
+                    </p>
+                </div>
+                <div class="footer-links">
+                    <h4>Nền tảng</h4>
+                    <ul>
+                        <li><a href="{{ url_for('quiz.library') }}">Thư viện</a></li>
+                        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                        <li><a href="#">Bảng xếp hạng</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Hỗ trợ</h4>
+                    <ul>
+                        <li><a href="#">Trung tâm trợ giúp</a></li>
+                        <li><a href="#">Hướng dẫn</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Về chúng tôi</h4>
+                    <ul>
+                        <li><a href="#">Giới thiệu</a></li>
+                        <li><a href="#">Liên hệ</a></li>
+                        <li><a href="#">Điều khoản</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center" style="border-top: 1px solid var(--color-surface-low); padding-top: 2rem;">
+                <p class="text-muted fs-sm">© 2024 QuizFlow. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-muted fs-sm">Quyền riêng tư</a>
+                    <a href="#" class="text-muted fs-sm">Điều khoản</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+</body>
+</html>

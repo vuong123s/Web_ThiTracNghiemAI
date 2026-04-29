@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý đề thi{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Đề thi của tôi</h1>
+            <p class="text-muted">Tạo đề từ ngân hàng câu hỏi, gán lớp học, bật lịch thi và chia sẻ link.</p>
+        </div>
+        <a href="{{ url_for('teacher.quizzes_create') }}" class="btn btn-primary">+ Tạo đề thi</a>
+    </div>
+
+    <div class="card">
+        {% if quizzes %}
+            <div class="table-container">
+                <table class="table" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Tiêu đề</th>
+                            <th>Lớp</th>
+                            <th>Số câu</th>
+                            <th>Lịch thi</th>
+                            <th>Trạng thái</th>
+                            <th>Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for quiz in quizzes %}
+                            <tr>
+                                <td>{{ quiz.id }}</td>
+                                <td>{{ quiz.title }}</td>
+                                <td>{{ quiz.classroom.name if quiz.classroom else '-' }}</td>
+                                <td>{{ quiz.questions.count() }}</td>
+                                <td>
+                                    {% if quiz.scheduled_at %}
+                                        {{ quiz.scheduled_at.strftime('%d/%m %H:%M') }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                    →
+                                    {% if quiz.expires_at %}
+                                        {{ quiz.expires_at.strftime('%d/%m %H:%M') }}
+                                    {% else %}
+                                        -
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if quiz.is_published %}
+                                        <span class="badge badge-success">Published</span>
+                                    {% else %}
+                                        <span class="badge badge-warning">Draft</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <div class="d-flex gap-2">
+                                        <a class="btn btn-outline btn-sm" href="{{ url_for('teacher.quizzes_edit', id=quiz.id) }}">Sửa</a>
+                                        <a class="btn btn-outline btn-sm" href="{{ url_for('teacher.quizzes_share', id=quiz.id) }}">Share</a>
+                                        <a class="btn btn-outline btn-sm" href="{{ url_for('teacher.quizzes_export', id=quiz.id) }}">Export</a>
+                                        <form method="POST" action="{{ url_for('teacher.quizzes_delete', id=quiz.id) }}">
+                                            <button class="btn btn-danger btn-sm" onclick="return confirm('Xóa đề thi này?')">Xóa</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">Bạn chưa có đề thi nào.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

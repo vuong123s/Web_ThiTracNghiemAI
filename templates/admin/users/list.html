@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Quản lý người dùng{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+        <div>
+            <h1>Quản lý người dùng</h1>
+            <p class="text-muted">Quản lý tài khoản và phân quyền hệ thống.</p>
+        </div>
+        <a href="{{ url_for('admin.users_create') }}" class="btn btn-primary">+ Tạo tài khoản</a>
+    </div>
+
+    <div class="card mb-4">
+        <form method="GET" class="d-flex gap-3 align-items-end flex-wrap">
+            <div style="flex: 2;">
+                <label class="form-label">Tìm kiếm</label>
+                <input class="form-control" name="search" value="{{ current_search }}" placeholder="Tên hoặc email...">
+            </div>
+            <div style="flex: 1;">
+                <label class="form-label">Vai trò</label>
+                <select class="form-control" name="role">
+                    <option value="">Tất cả</option>
+                    <option value="admin" {% if current_role == 'admin' %}selected{% endif %}>Quản trị</option>
+                    <option value="teacher" {% if current_role == 'teacher' %}selected{% endif %}>Giáo viên</option>
+                    <option value="student" {% if current_role == 'student' %}selected{% endif %}>Học viên</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" type="submit">Lọc</button>
+        </form>
+    </div>
+
+    <div class="card" style="padding: 0; overflow: hidden;">
+        {% if users %}
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Người dùng</th>
+                        <th>Vai trò</th>
+                        <th style="text-align: center;">Số bài thi</th>
+                        <th style="text-align: center;">Ngày tạo</th>
+                        <th style="width: 200px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for user in users %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-3">
+                                    <div style="width: 44px; height: 44px; border-radius: 50%; background: linear-gradient(to bottom right, {% if user.role == 'admin' %}var(--color-error), var(--color-secondary){% elif user.role == 'teacher' %}var(--color-accent), var(--color-primary){% else %}var(--color-primary), var(--color-secondary){% endif %}); display: flex; align-items: center; justify-content: center; color: white; font-weight: 700;">
+                                        {{ user.full_name[:1].upper() if user.full_name else 'U' }}
+                                    </div>
+                                    <div>
+                                        <p class="fw-bold" style="margin-bottom: 0.125rem;">{{ user.full_name or user.username }}</p>
+                                        <p class="text-muted fs-xs">{{ user.email }}</p>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge {% if user.role == 'admin' %}badge-error{% elif user.role == 'teacher' %}badge-warning{% else %}badge-primary{% endif %}">
+                                    {% if user.role == 'admin' %}Quản trị{% elif user.role == 'teacher' %}Giáo viên{% else %}Học viên{% endif %}
+                                </span>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="fw-bold">{{ user.submissions.count() }}</span>
+                            </td>
+                            <td style="text-align: center;">
+                                <span class="text-muted fs-sm">{{ user.created_at.strftime('%d/%m/%Y') }}</span>
+                            </td>
+                            <td>
+                                <div class="d-flex gap-2 justify-content-end">
+                                    <a href="{{ url_for('admin.users_edit', id=user.id) }}" class="btn btn-outline btn-sm">Sửa</a>
+                                    {% if user.id != current_user.id %}
+                                        <form method="POST" action="{{ url_for('admin.users_toggle_role', id=user.id) }}">
+                                            <select name="role" class="form-control form-select" style="width: auto; padding: 0.375rem 2rem 0.375rem 0.75rem; font-size: 0.75rem;" onchange="this.form.submit()">
+                                                <option value="student" {% if user.role == 'student' %}selected{% endif %}>Học viên</option>
+                                                <option value="teacher" {% if user.role == 'teacher' %}selected{% endif %}>Giáo viên</option>
+                                                <option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+                                            </select>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-muted">Chưa có người dùng nào.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}QuizFlow{% endblock %} - Thi Trắc Nghiệm Trực Tuyến</title>
+    <link
+        rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
+        crossorigin="anonymous"
+    >
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366F1'><path d='M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5'/></svg>">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="toast toast-{{ category }}">
+                        <span class="toast-icon">
+                            {% if category == 'success' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                            {% elif category == 'danger' or category == 'error' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>
+                            {% elif category == 'warning' %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            {% else %}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                            {% endif %}
+                        </span>
+                        <div class="toast-content">
+                            <div class="toast-message">{{ message }}</div>
+                        </div>
+                        <button class="toast-close" onclick="this.parentElement.remove()">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+
+    <!-- Navbar -->
+    <header class="navbar glass" style="height: 80px; min-height: 0; padding-top: 12px; padding-bottom: 12px;">
+        <div class="container navbar-inner" style="height: 100%;">
+            <a href="{{ url_for('index') }}" class="nav-brand" style="gap: 1.3rem; align-items: center;">
+                <div class="nav-icon" style="width: 28px; height: 28px; min-width: 28px; min-height: 28px; border-radius: 8px; box-shadow: 0 2px 8px 0 rgba(99,102,241,0.10);">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                </div>
+                <span class="nav-title" style="font-size: 1.1rem; font-weight: 800;">Quiz<span style="color: #6366F1;">Flow</span></span>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <nav class="nav-links desktop-nav" style="gap: 2.2rem; align-items: center;">
+                <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}" style="padding: 0.3rem 0.9rem; font-size: 0.97rem; border-radius: 1.1rem; font-weight: 600;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.2rem;"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                    Home
+                </a>
+                <a href="{{ url_for('quiz.library') if current_user.is_authenticated else url_for('auth.login') }}" class="nav-link {% if 'quiz' in (request.endpoint or '') %}active{% endif %}" style="padding: 0.3rem 0.9rem; font-size: 0.97rem; border-radius: 1.1rem; font-weight: 500;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.2rem;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                    Library
+                </a>
+                <a href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('auth.login') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}" style="padding: 0.3rem 0.9rem; font-size: 0.97rem; border-radius: 1.1rem; font-weight: 500;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.2rem;"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    Dashboard
+                </a>
+                {% if current_user.is_authenticated and current_user.is_admin() %}
+                    <a href="{{ url_for('admin.dashboard') }}" class="nav-link {% if 'admin' in (request.endpoint or '') %}active{% endif %}" style="padding: 0.3rem 0.9rem; font-size: 0.97rem; border-radius: 1.1rem; font-weight: 500;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.2rem;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        Admin
+                    </a>
+                {% endif %}
+                <a href="#" class="nav-link" style="padding: 0.3rem 0.9rem; font-size: 0.97rem; border-radius: 1.1rem; font-weight: 500;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.2rem;"><path d="M8.21 13.89 7 23l9-4 9 4-1.21-9.12"></path><path d="M6 9a6 6 0 0 1 12 0c0 7-6 11-6 11S6 16 6 9Z"></path><circle cx="12" cy="9" r="2.5"></circle></svg>
+                    Leaderboard
+                </a>
+            </nav>
+
+            <div class="navbar-actions desktop-nav" style="gap: 1.7rem; align-items: center;">
+                <button type="button" class="nav-action-btn" aria-label="Search" style="width: 22px; height: 22px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+                </button>
+                <button type="button" class="nav-action-btn nav-action-bell" aria-label="Notifications" style="width: 22px; height: 22px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.268 21a2 2 0 0 0 3.464 0"></path><path d="M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .738-1.674C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326"></path></svg>
+                </button>
+                <span class="nav-divider" style="height: 1.1rem; margin: 0 0.4rem;"></span>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('dashboard') }}" class="nav-auth-link" style="font-size: 0.97rem; padding: 0.2rem 0.6rem; margin-right: 1.1rem;">{{ current_user.full_name }}</a>
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-primary btn-sm" style="font-size: 0.97rem; padding: 0.3rem 1rem; border-radius: 1.1rem; font-weight: 700;">Đăng xuất</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="nav-auth-link" style="font-size: 0.97rem; padding: 0.2rem 0.6rem; margin-right: 1.1rem;">Log in</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm" style="font-size: 0.97rem; padding: 0.3rem 1rem; border-radius: 1.1rem; font-weight: 700;">Get Started</a>
+                {% endif %}
+            </div>
+
+            <button class="btn btn-ghost btn-icon mobile-menu" id="mobile-menu-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu-dropdown" id="mobile-menu" style="display: none;">
+        <div class="container py-4">
+            <a href="{{ url_for('index') }}" class="nav-link">Home</a>
+            <a href="{{ url_for('quiz.library') if current_user.is_authenticated else url_for('auth.login') }}" class="nav-link">Library</a>
+            <a href="{{ url_for('dashboard') if current_user.is_authenticated else url_for('auth.login') }}" class="nav-link">Dashboard</a>
+            {% if current_user.is_authenticated and current_user.is_admin() %}
+                <a href="{{ url_for('admin.dashboard') }}" class="nav-link">Admin</a>
+            {% endif %}
+            <a href="#" class="nav-link">Leaderboard</a>
+            <div class="mt-4 d-flex gap-2">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('auth.logout') }}" class="btn btn-primary btn-sm">Đăng xuất</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-ghost btn-sm">Log in</a>
+                    <a href="{{ url_for('auth.register') }}" class="btn btn-primary btn-sm">Get Started</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="grid grid-cols-4 gap-4 mb-6">
+                <div>
+                    <div class="footer-brand">
+                        <div class="footer-icon">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
+                        </div>
+                        <span class="footer-title">Quiz<span class="text-primary">Flow</span></span>
+                    </div>
+                    <p class="footer-desc">
+                        Nền tảng thi trắc nghiệm trực tuyến hiện đại, giúp học sinh và giáo viên quản lý việc học tập hiệu quả.
+                    </p>
+                </div>
+                <div class="footer-links">
+                    <h4>Nền tảng</h4>
+                    <ul>
+                        <li><a href="{{ url_for('quiz.library') }}">Thư viện</a></li>
+                        <li><a href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                        <li><a href="#">Bảng xếp hạng</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Hỗ trợ</h4>
+                    <ul>
+                        <li><a href="#">Trung tâm trợ giúp</a></li>
+                        <li><a href="#">Hướng dẫn</a></li>
+                        <li><a href="#">FAQ</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h4>Về chúng tôi</h4>
+                    <ul>
+                        <li><a href="#">Giới thiệu</a></li>
+                        <li><a href="#">Liên hệ</a></li>
+                        <li><a href="#">Điều khoản</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="d-flex justify-content-between align-items-center" style="border-top: 1px solid var(--color-surface-low); padding-top: 2rem;">
+                <p class="text-muted fs-sm">© 2024 QuizFlow. All rights reserved.</p>
+                <div class="d-flex gap-3">
+                    <a href="#" class="text-muted fs-sm">Quyền riêng tư</a>
+                    <a href="#" class="text-muted fs-sm">Điều khoản</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script
+        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+        crossorigin="anonymous"
+    ></script>
+    <script src="{{ url_for('static', filename='js/quiz.js') }}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

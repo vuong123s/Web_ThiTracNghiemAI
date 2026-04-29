@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+
+{% block title %}Tạo đề thi{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <a href="{{ url_for('teacher.quizzes_list') }}" class="btn btn-ghost mb-4">← Quay lại danh sách đề thi</a>
+    <h1 class="mb-4">Tạo đề thi mới</h1>
+
+    <div class="card">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="form-label">Tiêu đề</label>
+                    {{ form.title(class="form-control") }}
+                </div>
+                <div>
+                    <label class="form-label">Lớp học</label>
+                    {{ form.class_id(class="form-control") }}
+                </div>
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label">Mô tả</label>
+                {{ form.description(class="form-control", rows="3") }}
+            </div>
+
+            <div class="grid grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="form-label">Thời gian (phút)</label>
+                    {{ form.time_limit_minutes(class="form-control") }}
+                </div>
+                <div>
+                    <label class="form-label">Mở thi</label>
+                    {{ form.scheduled_at(class="form-control", placeholder="YYYY-MM-DD HH:MM") }}
+                </div>
+                <div>
+                    <label class="form-label">Đóng thi</label>
+                    {{ form.expires_at(class="form-control", placeholder="YYYY-MM-DD HH:MM") }}
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <label class="d-flex align-items-center gap-2">{{ form.is_shuffled() }} Trộn câu hỏi</label>
+                <label class="d-flex align-items-center gap-2">{{ form.shuffle_options() }} Trộn đáp án</label>
+                <label class="d-flex align-items-center gap-2">{{ form.allow_retake() }} Cho phép làm lại</label>
+                <label class="d-flex align-items-center gap-2">{{ form.is_published() }} Công khai ngay</label>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="form-label">Logo URL</label>
+                    {{ form.brand_logo_url(class="form-control") }}
+                </div>
+                <div>
+                    <label class="form-label">Màu thương hiệu</label>
+                    {{ form.brand_color(class="form-control", placeholder="#2563eb") }}
+                </div>
+            </div>
+
+            <hr class="mb-4">
+            <h3 class="mb-3">Nguồn câu hỏi</h3>
+            <div class="mb-4">
+                <label class="form-label">Chế độ</label>
+                {{ form.source_mode(class="form-control", id="source-mode") }}
+            </div>
+
+            <div id="random-block" class="grid grid-cols-3 gap-4 mb-4">
+                <div>
+                    <label class="form-label">Lọc chủ đề</label>
+                    {{ form.random_category(class="form-control") }}
+                </div>
+                <div>
+                    <label class="form-label">Lọc độ khó</label>
+                    {{ form.random_difficulty(class="form-control") }}
+                </div>
+                <div>
+                    <label class="form-label">Số câu random</label>
+                    {{ form.random_count(class="form-control") }}
+                </div>
+            </div>
+
+            <div id="selected-block" class="mb-4">
+                <label class="form-label">Chọn câu hỏi từ ngân hàng</label>
+                <div style="max-height: 300px; overflow-y:auto; border:1px solid #ddd; padding:10px;">
+                    {% for q in bank_questions %}
+                        <label class="d-flex align-items-start gap-2 mb-2">
+                            <input type="checkbox" name="bank_question_ids" value="{{ q.id }}">
+                            <span>[{{ q.type }}][{{ q.difficulty }}] {{ q.text[:140] }}{% if q.text|length > 140 %}...{% endif %}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <button class="btn btn-primary" type="submit">Tạo đề thi</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    (function () {
+        const mode = document.getElementById('source-mode');
+        const randomBlock = document.getElementById('random-block');
+        const selectedBlock = document.getElementById('selected-block');
+        const toggle = () => {
+            const isRandom = mode.value === 'random';
+            randomBlock.style.display = isRandom ? 'grid' : 'none';
+            selectedBlock.style.display = isRandom ? 'none' : 'block';
+        };
+        mode.addEventListener('change', toggle);
+        toggle();
+    })();
+</script>
+{% endblock %}
+

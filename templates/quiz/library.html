@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Thư viện đề thi{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Thư viện đề thi</h1>
+            <p class="text-muted">Làm bài trực tuyến, có timer, trộn câu/đáp án và phản hồi chi tiết.</p>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <form method="GET" class="d-flex gap-3 align-items-end">
+            <div style="flex:1;">
+                <label class="form-label">Tìm kiếm đề thi</label>
+                <input class="form-control" name="search" value="{{ current_search }}" placeholder="Nhập tiêu đề...">
+            </div>
+            <button class="btn btn-primary" type="submit">Tìm</button>
+        </form>
+    </div>
+
+    {% if current_user.is_student() %}
+        <div class="card mb-4">
+            <h3 class="mb-2">Tham gia lớp bằng join code</h3>
+            <form method="POST" action="{{ url_for('quiz.join_class') }}" class="d-flex gap-2 align-items-end">
+                {{ join_form.hidden_tag() }}
+                <div>
+                    <label class="form-label">Mã lớp</label>
+                    {{ join_form.join_code(class="form-control", placeholder="VD: NQ12A1") }}
+                </div>
+                <button class="btn btn-outline" type="submit">Tham gia</button>
+            </form>
+        </div>
+        <div class="card mb-4 d-flex justify-content-between align-items-center flex-wrap gap-3">
+            <div>
+                <h3 class="mb-1">Tài liệu lớp học</h3>
+                <p class="text-muted mb-0">Xem tài liệu được giáo viên chia sẻ trong lớp.</p>
+            </div>
+            <a class="btn btn-outline" href="{{ url_for('quiz.class_documents') }}">Xem tài liệu</a>
+        </div>
+    {% endif %}
+
+    <div class="grid grid-cols-2 gap-4">
+        {% for quiz in quizzes %}
+            <div class="card">
+                <h3 class="mb-2">{{ quiz.title }}</h3>
+                <p class="text-muted">{{ quiz.description or 'Không có mô tả.' }}</p>
+                <p class="mb-1"><strong>Thời gian:</strong> {{ quiz.time_limit_minutes }} phút</p>
+                <p class="mb-1"><strong>Số câu:</strong> {{ quiz.questions.count() }}</p>
+                <p class="mb-1"><strong>Lớp:</strong> {{ quiz.classroom.name if quiz.classroom else 'Public' }}</p>
+                <div class="d-flex gap-2 mt-3">
+                    <a class="btn btn-primary" href="{{ url_for('quiz.start_quiz', quiz_id=quiz.id) }}">Bắt đầu</a>
+                    {% if quiz.class_id and quiz.class_id in enrolled_class_ids %}
+                        <span class="badge badge-success">Đã tham gia lớp</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <div class="card">
+                <p class="text-muted">Không tìm thấy đề thi phù hợp.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

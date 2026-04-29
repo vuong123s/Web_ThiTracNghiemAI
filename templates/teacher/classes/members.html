@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Thành viên lớp {{ classroom.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <a href="{{ url_for('teacher.classes_list') }}" class="btn btn-ghost mb-4">← Quay lại lớp học</a>
+    <h1 class="mb-2">{{ classroom.name }}</h1>
+    <p class="text-muted mb-4">Join code: <strong>{{ classroom.join_code }}</strong></p>
+    <div class="card mb-4">
+        <h3 class="mb-2">Chia sẻ lớp học</h3>
+        <p class="text-muted mb-3">Học sinh có thể quét QR hoặc mở link để gửi yêu cầu tham gia lớp.</p>
+        <div class="d-flex gap-4 align-items-center flex-wrap">
+            <div style="max-width: 220px;">
+                <img src="{{ class_qr_url }}" alt="Class QR" style="width: 220px; border-radius: 12px;">
+            </div>
+            <div>
+                <label class="form-label">Link tham gia lớp</label>
+                <input class="form-control" style="min-width: 420px;" value="{{ join_link }}" readonly onclick="this.select()">
+                <small class="text-muted">Link dành cho học sinh đã đăng nhập.</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid" style="grid-template-columns: 1fr 1fr; gap: 2rem;">
+        <div class="card">
+            <h3 class="mb-3">Học sinh chờ duyệt</h3>
+            {% if pending_members %}
+                {% for m in pending_members %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>{{ m.user.display_name }} ({{ m.user.email }})</div>
+                        <form method="POST" action="{{ url_for('teacher.class_member_approve', class_id=classroom.id, membership_id=m.id) }}">
+                            <button class="btn btn-primary btn-sm">Duyệt</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Không có yêu cầu chờ duyệt.</p>
+            {% endif %}
+        </div>
+
+        <div class="card">
+            <h3 class="mb-3">Học sinh đã duyệt</h3>
+            {% if approved_members %}
+                {% for m in approved_members %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>{{ m.user.display_name }} ({{ m.user.email }})</div>
+                        <form method="POST" action="{{ url_for('teacher.class_member_remove', class_id=classroom.id, membership_id=m.id) }}">
+                            <button class="btn btn-danger btn-sm" onclick="return confirm('Xóa học sinh khỏi lớp?')">Xóa</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="text-muted">Chưa có học sinh nào trong lớp.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <h3 class="mb-3">Upload tài liệu lớp học</h3>
+        <form method="POST" enctype="multipart/form-data" action="{{ url_for('teacher.class_document_upload', class_id=classroom.id) }}">
+            {{ upload_form.hidden_tag() }}
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                    <label class="form-label">Tiêu đề tài liệu</label>
+                    {{ upload_form.title(class="form-control") }}
+                </div>
+                <div>
+                    <label class="form-label">File</label>
+                    {{ upload_form.file(class="form-control") }}
+                </div>
+            </div>
+            <button class="btn btn-primary" type="submit">Upload</button>
+        </form>
+    </div>
+
+    <div class="card mt-4">
+        <h3 class="mb-3">Tài liệu đã upload</h3>
+        {% if documents %}
+            <ul>
+                {% for d in documents %}
+                    <li>
+                        <a href="{{ d.file_url }}" target="_blank">{{ d.title }}</a>
+                        <span class="text-muted">({{ d.file_type or 'file' }})</span>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p class="text-muted">Chưa có tài liệu nào.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

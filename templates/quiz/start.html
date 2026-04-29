@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Bắt đầu làm bài{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <a href="{{ url_for('quiz.library') if current_user.is_authenticated else url_for('index') }}" class="btn btn-ghost mb-4">← Quay lại</a>
+
+    <div class="card" style="max-width: 760px; margin: 0 auto;">
+        {% if quiz.brand_logo_url %}
+            <img src="{{ quiz.brand_logo_url }}" alt="quiz-logo" style="max-height: 70px; margin-bottom: 1rem;">
+        {% endif %}
+        <h1 class="mb-3" style="{% if quiz.brand_color %}color: {{ quiz.brand_color }};{% endif %}">{{ quiz.title }}</h1>
+        <p class="text-muted">{{ quiz.description or 'Không có mô tả.' }}</p>
+        <p><strong>Thời gian:</strong> {{ quiz.time_limit_minutes }} phút</p>
+        <p><strong>Số câu:</strong> {{ quiz.questions.count() }}</p>
+        <p><strong>Trộn câu hỏi:</strong> {{ 'Có' if quiz.is_shuffled else 'Không' }}</p>
+        <p><strong>Trộn đáp án:</strong> {{ 'Có' if quiz.shuffle_options else 'Không' }}</p>
+
+        <hr class="my-4">
+        <h3 class="mb-3">Nhập thông tin trước khi làm bài</h3>
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <div class="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                    <label class="form-label">Họ và tên</label>
+                    {{ form.student_name(class="form-control") }}
+                </div>
+                <div>
+                    <label class="form-label">Email</label>
+                    {{ form.student_email(class="form-control") }}
+                </div>
+            </div>
+            <button class="btn btn-primary" type="submit">Bắt đầu làm bài</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

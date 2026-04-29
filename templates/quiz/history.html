@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Lịch sử làm bài{% endblock %}
+
+{% block content %}
+<div class="container py-6">
+    <h1 class="mb-4">Lịch sử làm bài</h1>
+
+    <div class="card">
+        {% if results %}
+            <div class="table-container">
+                <table class="table" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Đề thi</th>
+                            <th>Điểm</th>
+                            <th>Trạng thái</th>
+                            <th>Thời gian nộp</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for r in results %}
+                            <tr>
+                                <td>{{ r.id }}</td>
+                                <td>{{ r.quiz.title }}</td>
+                                <td>{{ r.total_score }}/{{ r.max_score }} ({{ "%.1f"|format(r.score_percent) }}%)</td>
+                                <td>{{ r.status }}</td>
+                                <td>{{ r.submitted_at.strftime('%d/%m/%Y %H:%M') if r.submitted_at else '-' }}</td>
+                                <td><a class="btn btn-outline btn-sm" href="{{ url_for('quiz.result', result_id=r.id) }}">Xem</a></td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <p class="text-muted">Bạn chưa có bài làm nào.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
