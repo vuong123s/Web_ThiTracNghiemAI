@@ -3,43 +3,228 @@
 {% block title %}Bài làm học sinh{% endblock %}
 
 {% block content %}
-<div class="container py-6">
-    <h1 class="mb-4">Bài làm của học sinh</h1>
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 12px;
+        margin-bottom: 2rem;
+    }
+    
+    .page-header h1 {
+        color: white;
+        font-size: 2rem;
+        margin: 0;
+    }
+    
+    .results-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    
+    .results-table thead {
+        background: #f8f9fa;
+        border-bottom: 2px solid #dee2e6;
+    }
+    
+    .results-table th {
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #495057;
+        font-size: 0.95rem;
+    }
+    
+    .results-table tbody tr {
+        border-bottom: 1px solid #dee2e6;
+        transition: background-color 0.2s ease;
+    }
+    
+    .results-table tbody tr:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .results-table td {
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    
+    .student-info {
+        font-weight: 500;
+        color: #212529;
+    }
+    
+    .score-cell {
+        font-weight: 600;
+        color: #667eea;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.4rem 0.8rem;
+        border-radius: 16px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .status-submitted {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-graded {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .score-high {
+        background-color: #d4edda;
+    }
+    
+    .score-medium {
+        background-color: #fff3cd;
+    }
+    
+    .score-low {
+        background-color: #f8d7da;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 0.5rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.2s ease;
+        font-size: 0.9rem;
+    }
+    
+    .btn-primary {
+        background: #667eea;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #5568d3;
+        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6c757d;
+    }
+    
+    .empty-state svg {
+        width: 64px;
+        height: 64px;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+    
+    .table-card {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        overflow: hidden;
+    }
+    
+    .table-wrapper {
+        overflow-x: auto;
+    }
+    
+    .score-percent {
+        font-size: 0.9rem;
+        opacity: 0.8;
+    }
+</style>
 
-    <div class="card">
+<div class="container py-4">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1>📊 Bài làm của học sinh</h1>
+        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Quản lý và chấm bài làm của các học sinh</p>
+    </div>
+
+    <!-- Results Table -->
+    <div class="table-card">
         {% if results %}
-            <div class="table-container">
-                <table class="table" style="width:100%">
+            <div class="table-wrapper">
+                <table class="results-table">
                     <thead>
                         <tr>
-                            <th>ID</th>
-                            <th>Học sinh</th>
-                            <th>Đề thi</th>
-                            <th>Điểm</th>
-                            <th>Trạng thái</th>
-                            <th>Nộp lúc</th>
-                            <th></th>
+                            <th style="width: 60px;">ID</th>
+                            <th style="width: 200px;">Học sinh</th>
+                            <th style="width: 250px;">Đề thi</th>
+                            <th style="width: 120px;">Điểm</th>
+                            <th style="width: 100px;">Trạng thái</th>
+                            <th style="width: 150px;">Nộp lúc</th>
+                            <th style="width: 100px;">Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for r in results %}
                             <tr>
-                                <td>{{ r.id }}</td>
-                                <td>{{ r.display_student_name }}</td>
+                                <td><strong>#{{ r.id }}</strong></td>
+                                <td>
+                                    <div class="student-info">{{ r.display_student_name }}</div>
+                                    <small style="color: #6c757d;">{{ r.display_student_email }}</small>
+                                </td>
                                 <td>{{ r.quiz.title }}</td>
-                                <td>{{ r.total_score }}/{{ r.max_score }} ({{ "%.1f"|format(r.score_percent) }}%)</td>
-                                <td>{{ r.status }}</td>
-                                <td>{{ r.submitted_at.strftime('%d/%m/%Y %H:%M') if r.submitted_at else '-' }}</td>
-                                <td><a class="btn btn-outline btn-sm" href="{{ url_for('teacher.result_detail', result_id=r.id) }}">Chi tiết</a></td>
+                                <td>
+                                    <div class="score-cell">
+                                        {% set percent = r.score_percent %}
+                                        <span style="{% if percent >= 80 %}color: #155724;{% elif percent >= 60 %}color: #856404;{% else %}color: #721c24;{% endif %}">
+                                            {{ r.total_score }}/{{ r.max_score }}
+                                        </span>
+                                    </div>
+                                    <span class="score-percent">({{ "%.1f"|format(r.score_percent) }}%)</span>
+                                </td>
+                                <td>
+                                    {% if r.status == 'submitted' %}
+                                        <span class="status-badge status-submitted">⏳ Chờ chấm</span>
+                                    {% elif r.status == 'graded' %}
+                                        <span class="status-badge status-graded">✓ Đã chấm</span>
+                                    {% else %}
+                                        <span class="status-badge">{{ r.status }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if r.submitted_at %}
+                                        <small>{{ r.submitted_at.strftime('%d/%m/%Y') }}</small><br>
+                                        <small style="color: #6c757d;">{{ r.submitted_at.strftime('%H:%M') }}</small>
+                                    {% else %}
+                                        <small style="color: #6c757d;">-</small>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a class="btn btn-primary" href="{{ url_for('teacher.result_detail', result_id=r.id) }}">
+                                        📝 Chi tiết
+                                    </a>
+                                </td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
         {% else %}
-            <p class="text-muted">Chưa có bài làm nào.</p>
+            <div class="empty-state">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
+                <h3 style="color: #495057; margin-bottom: 0.5rem;">Chưa có bài làm nào</h3>
+                <p style="margin: 0;">Hiện tại chưa có học sinh nào nộp bài. Vui lòng chờ học sinh hoàn thành bài kiểm tra.</p>
+            </div>
         {% endif %}
     </div>
 </div>
+
 {% endblock %}
 
