@@ -4,137 +4,33 @@
 
 {% block content %}
 <style>
-    .page-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 2rem;
-        border-radius: 12px;
-        margin-bottom: 2rem;
+    body {
+        background: #f5f7fa;
     }
     
-    .page-header h1 {
-        color: white;
+    .page-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem 1rem;
+    }
+    
+    .page-title {
         font-size: 2rem;
-        margin: 0;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin-bottom: 0.5rem;
     }
     
-    .results-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 0;
-    }
-    
-    .results-table thead {
-        background: #f8f9fa;
-        border-bottom: 2px solid #dee2e6;
-    }
-    
-    .results-table th {
-        padding: 1rem;
-        text-align: left;
-        font-weight: 600;
-        color: #495057;
-        font-size: 0.95rem;
-    }
-    
-    .results-table tbody tr {
-        border-bottom: 1px solid #dee2e6;
-        transition: background-color 0.2s ease;
-    }
-    
-    .results-table tbody tr:hover {
-        background-color: #f8f9fa;
-    }
-    
-    .results-table td {
-        padding: 1rem;
-        vertical-align: middle;
-    }
-    
-    .student-info {
-        font-weight: 500;
-        color: #212529;
-    }
-    
-    .score-cell {
-        font-weight: 600;
-        color: #667eea;
-    }
-    
-    .status-badge {
-        display: inline-block;
-        padding: 0.4rem 0.8rem;
-        border-radius: 16px;
-        font-size: 0.85rem;
-        font-weight: 600;
-    }
-    
-    .status-submitted {
-        background-color: #fff3cd;
-        color: #856404;
-    }
-    
-    .status-graded {
-        background-color: #d4edda;
-        color: #155724;
-    }
-    
-    .score-high {
-        background-color: #d4edda;
-    }
-    
-    .score-medium {
-        background-color: #fff3cd;
-    }
-    
-    .score-low {
-        background-color: #f8d7da;
-    }
-    
-    .action-buttons {
-        display: flex;
-        gap: 0.5rem;
-    }
-    
-    .btn {
-        padding: 0.5rem 1rem;
-        border-radius: 6px;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-block;
-        transition: all 0.2s ease;
-        font-size: 0.9rem;
-    }
-    
-    .btn-primary {
-        background: #667eea;
-        color: white;
-    }
-    
-    .btn-primary:hover {
-        background: #5568d3;
-        box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
-    }
-    
-    .empty-state {
-        text-align: center;
-        padding: 3rem;
-        color: #6c757d;
-    }
-    
-    .empty-state svg {
-        width: 64px;
-        height: 64px;
-        margin-bottom: 1rem;
-        opacity: 0.5;
+    .page-subtitle {
+        color: #666;
+        margin-bottom: 2rem;
+        font-size: 1rem;
     }
     
     .table-card {
         background: white;
-        border-radius: 12px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        border-radius: 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         overflow: hidden;
     }
     
@@ -142,33 +38,196 @@
         overflow-x: auto;
     }
     
-    .score-percent {
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 0;
+    }
+    
+    thead {
+        background: linear-gradient(135deg, #f5f7fa 0%, #eeeff2 100%);
+        border-bottom: 2px solid #e1e4e8;
+    }
+    
+    th {
+        padding: 1.2rem;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
         font-size: 0.9rem;
-        opacity: 0.8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    tbody tr {
+        border-bottom: 1px solid #e1e4e8;
+        transition: all 0.2s ease;
+    }
+    
+    tbody tr:hover {
+        background: #f9fafb;
+    }
+    
+    td {
+        padding: 1.2rem;
+        color: #333;
+    }
+    
+    .student-name {
+        font-weight: 600;
+        color: #1a1a1a;
+    }
+    
+    .student-email {
+        font-size: 0.85rem;
+        color: #999;
+        margin-top: 0.25rem;
+    }
+    
+    .score-display {
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+    
+    .score-high {
+        color: #2d7d34;
+    }
+    
+    .score-medium {
+        color: #bf8f00;
+    }
+    
+    .score-low {
+        color: #c62828;
+    }
+    
+    .percentage {
+        font-size: 0.85rem;
+        color: #999;
+        margin-top: 0.25rem;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 16px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-align: center;
+        min-width: 100px;
+    }
+    
+    .status-submitted {
+        background: #fff3cd;
+        color: #664d03;
+    }
+    
+    .status-graded {
+        background: #d1e7dd;
+        color: #0f5132;
+    }
+    
+    .status-in-progress {
+        background: #cfe2ff;
+        color: #084298;
+    }
+    
+    .action-btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        text-decoration: none;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+        border: none;
+        cursor: pointer;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+    
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+    
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+    
+    .empty-title {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .empty-text {
+        color: #999;
+        margin: 0;
+    }
+    
+    .time-cell {
+        font-size: 0.9rem;
+    }
+    
+    .time-date {
+        color: #333;
+        font-weight: 500;
+    }
+    
+    .time-hour {
+        color: #999;
+        font-size: 0.85rem;
+    }
+    
+    @media (max-width: 768px) {
+        .page-container {
+            padding: 1rem 0.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.5rem;
+        }
+        
+        th, td {
+            padding: 0.75rem;
+            font-size: 0.85rem;
+        }
+        
+        .table-wrapper {
+            overflow-x: scroll;
+        }
+        
+        table {
+            min-width: 800px;
+        }
     }
 </style>
 
-<div class="container py-4">
-    <!-- Page Header -->
-    <div class="page-header">
-        <h1>📊 Bài làm của học sinh</h1>
-        <p style="margin: 0.5rem 0 0 0; opacity: 0.9;">Quản lý và chấm bài làm của các học sinh</p>
-    </div>
+<div class="page-container">
+    <h1 class="page-title">📊 Bài làm của học sinh</h1>
+    <p class="page-subtitle">Quản lý và chấm bài làm từ các học sinh</p>
 
-    <!-- Results Table -->
     <div class="table-card">
         {% if results %}
             <div class="table-wrapper">
-                <table class="results-table">
+                <table>
                     <thead>
                         <tr>
-                            <th style="width: 60px;">ID</th>
+                            <th style="width: 50px;">ID</th>
                             <th style="width: 200px;">Học sinh</th>
                             <th style="width: 250px;">Đề thi</th>
                             <th style="width: 120px;">Điểm</th>
                             <th style="width: 100px;">Trạng thái</th>
-                            <th style="width: 150px;">Nộp lúc</th>
-                            <th style="width: 100px;">Hành động</th>
+                            <th style="width: 150px;">Thời gian nộp</th>
+                            <th style="width: 110px;">Hành động</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -176,18 +235,16 @@
                             <tr>
                                 <td><strong>#{{ r.id }}</strong></td>
                                 <td>
-                                    <div class="student-info">{{ r.display_student_name }}</div>
-                                    <small style="color: #6c757d;">{{ r.display_student_email }}</small>
+                                    <div class="student-name">{{ r.display_student_name }}</div>
+                                    <div class="student-email">{{ r.display_student_email }}</div>
                                 </td>
                                 <td>{{ r.quiz.title }}</td>
                                 <td>
-                                    <div class="score-cell">
-                                        {% set percent = r.score_percent %}
-                                        <span style="{% if percent >= 80 %}color: #155724;{% elif percent >= 60 %}color: #856404;{% else %}color: #721c24;{% endif %}">
-                                            {{ r.total_score }}/{{ r.max_score }}
-                                        </span>
+                                    {% set percent = r.score_percent %}
+                                    <div class="score-display {% if percent >= 80 %}score-high{% elif percent >= 60 %}score-medium{% else %}score-low{% endif %}">
+                                        {{ r.total_score }}/{{ r.max_score }}
                                     </div>
-                                    <span class="score-percent">({{ "%.1f"|format(r.score_percent) }}%)</span>
+                                    <div class="percentage">({{ "%.1f"|format(percent) }}%)</div>
                                 </td>
                                 <td>
                                     {% if r.status == 'submitted' %}
@@ -195,19 +252,21 @@
                                     {% elif r.status == 'graded' %}
                                         <span class="status-badge status-graded">✓ Đã chấm</span>
                                     {% else %}
-                                        <span class="status-badge">{{ r.status }}</span>
+                                        <span class="status-badge status-in-progress">{{ r.status }}</span>
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if r.submitted_at %}
-                                        <small>{{ r.submitted_at.strftime('%d/%m/%Y') }}</small><br>
-                                        <small style="color: #6c757d;">{{ r.submitted_at.strftime('%H:%M') }}</small>
-                                    {% else %}
-                                        <small style="color: #6c757d;">-</small>
-                                    {% endif %}
+                                    <div class="time-cell">
+                                        {% if r.submitted_at %}
+                                            <div class="time-date">{{ r.submitted_at.strftime('%d/%m/%Y') }}</div>
+                                            <div class="time-hour">{{ r.submitted_at.strftime('%H:%M') }}</div>
+                                        {% else %}
+                                            <span style="color: #999;">—</span>
+                                        {% endif %}
+                                    </div>
                                 </td>
                                 <td>
-                                    <a class="btn btn-primary" href="{{ url_for('teacher.result_detail', result_id=r.id) }}">
+                                    <a href="{{ url_for('teacher.result_detail', result_id=r.id) }}" class="action-btn">
                                         📝 Chi tiết
                                     </a>
                                 </td>
@@ -218,9 +277,9 @@
             </div>
         {% else %}
             <div class="empty-state">
-                <div style="font-size: 3rem; margin-bottom: 1rem;">📋</div>
-                <h3 style="color: #495057; margin-bottom: 0.5rem;">Chưa có bài làm nào</h3>
-                <p style="margin: 0;">Hiện tại chưa có học sinh nào nộp bài. Vui lòng chờ học sinh hoàn thành bài kiểm tra.</p>
+                <div class="empty-icon">📋</div>
+                <h3 class="empty-title">Chưa có bài làm nào</h3>
+                <p class="empty-text">Hiện tại chưa có học sinh nào nộp bài. Vui lòng chờ học sinh hoàn thành bài kiểm tra.</p>
             </div>
         {% endif %}
     </div>

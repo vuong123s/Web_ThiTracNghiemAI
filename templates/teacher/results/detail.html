@@ -4,334 +4,391 @@
 
 {% block content %}
 <style>
-    .teacher-header {
+    .detail-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+    
+    .detail-inner {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 0 1rem;
+    }
+    
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: white;
+        text-decoration: none;
+        margin-bottom: 2rem;
+        font-weight: 600;
+        transition: all 0.2s ease;
+    }
+    
+    .back-btn:hover {
+        transform: translateX(-4px);
+    }
+    
+    .header-card {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 2rem;
+        border-radius: 16px;
+        padding: 2.5rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 12px 32px rgba(102, 126, 234, 0.25);
+    }
+    
+    .header-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin: 0 0 1.5rem 0;
+    }
+    
+    .header-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 1.5rem;
+    }
+    
+    .header-item {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 1rem;
         border-radius: 12px;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .header-label {
+        font-size: 0.8rem;
+        opacity: 0.85;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .header-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+    }
+    
+    .questions-card {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
         margin-bottom: 2rem;
     }
     
-    .teacher-header h1 {
-        color: white;
-        font-size: 2rem;
-        margin: 0 0 1rem 0;
+    .question-item {
+        border-bottom: 1px solid #e1e4e8;
+        padding: 2rem;
+        transition: all 0.2s ease;
     }
     
-    .summary-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    .question-item:last-child {
+        border-bottom: none;
+    }
+    
+    .question-item:hover {
+        background: #fafbfc;
+    }
+    
+    .q-header {
+        display: flex;
+        align-items: center;
         gap: 1rem;
-        margin-top: 1rem;
+        margin-bottom: 1rem;
+        justify-content: space-between;
     }
     
-    .summary-item {
-        background: rgba(255, 255, 255, 0.1);
-        padding: 1rem;
-        border-radius: 8px;
-        text-align: center;
-    }
-    
-    .summary-label {
-        font-size: 0.85rem;
-        opacity: 0.9;
-        display: block;
-        margin-bottom: 0.5rem;
-    }
-    
-    .summary-value {
-        font-size: 1.5rem;
-        font-weight: bold;
-        display: block;
-    }
-    
-    .question-card {
-        border-left: 4px solid #667eea;
-        margin-bottom: 1.5rem;
-        overflow: hidden;
-    }
-    
-    .question-header {
-        background-color: #f8f9fa;
-        padding: 1rem;
-        border-bottom: 1px solid #dee2e6;
-    }
-    
-    .question-number {
-        display: inline-block;
-        background: #667eea;
+    .q-number {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.85rem;
-        font-weight: bold;
-        margin-right: 0.5rem;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 700;
+        flex-shrink: 0;
     }
     
-    .result-badge {
-        display: inline-block;
-        padding: 0.4rem 0.8rem;
-        border-radius: 16px;
-        font-weight: 600;
-        font-size: 0.85rem;
-    }
-    
-    .badge-correct {
-        background-color: #d4edda;
-        color: #155724;
-    }
-    
-    .badge-incorrect {
-        background-color: #f8d7da;
-        color: #721c24;
-    }
-    
-    .question-text {
+    .q-text {
         font-size: 1.1rem;
-        font-weight: 500;
-        color: #212529;
-        margin: 0;
-    }
-    
-    .question-content {
-        padding: 1.5rem;
-    }
-    
-    .answer-section {
-        margin: 1rem 0;
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-    }
-    
-    .answer-section label {
         font-weight: 600;
-        color: #495057;
-        display: block;
-        margin-bottom: 0.5rem;
-    }
-    
-    .essay-content {
-        padding: 1rem;
-        background: white;
-        border-left: 3px solid #ffc107;
-        border-radius: 6px;
-        white-space: pre-wrap;
-        word-break: break-word;
+        color: #1a1a1a;
+        margin: 1rem 0;
         line-height: 1.6;
     }
     
-    .grading-form {
-        background: #e8f4f8;
-        padding: 1.5rem;
+    .answer-display {
+        background: #f5f7fa;
+        border-left: 4px solid #667eea;
+        padding: 1rem;
         border-radius: 8px;
-        border-left: 4px solid #17a2b8;
+        margin: 1rem 0;
+    }
+    
+    .answer-label {
+        font-size: 0.85rem;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+    
+    .answer-text {
+        color: #1a1a1a;
+        font-size: 1rem;
+        font-weight: 500;
+    }
+    
+    .essay-box {
+        background: #fffbf0;
+        border-left: 4px solid #ffc107;
+        padding: 1rem;
+        border-radius: 8px;
+        white-space: pre-wrap;
+        word-break: break-word;
+        line-height: 1.6;
+        margin: 1rem 0;
+    }
+    
+    .grading-section {
+        background: linear-gradient(135deg, #e3f2fd 0%, #f3e5f5 100%);
+        border: 2px dashed #667eea;
+        border-radius: 12px;
+        padding: 1.5rem;
         margin-top: 1.5rem;
     }
     
-    .grading-form h4 {
-        color: #17a2b8;
+    .grading-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #667eea;
         margin-bottom: 1rem;
-        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
     }
     
     .form-group {
         margin-bottom: 1rem;
     }
     
-    .form-group label {
-        font-weight: 600;
-        color: #495057;
+    .form-label {
         display: block;
+        font-weight: 600;
+        color: #1a1a1a;
         margin-bottom: 0.5rem;
+        font-size: 0.95rem;
     }
     
     .form-control {
         width: 100%;
         padding: 0.75rem;
-        border: 1px solid #dee2e6;
-        border-radius: 6px;
+        border: 2px solid #e1e4e8;
+        border-radius: 8px;
         font-family: inherit;
         font-size: 1rem;
+        transition: all 0.2s ease;
     }
     
     .form-control:focus {
         outline: none;
-        border-color: #17a2b8;
-        box-shadow: 0 0 0 3px rgba(23, 162, 184, 0.25);
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
     }
     
-    .button-group {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        margin-top: 1rem;
-    }
-    
-    .btn {
-        padding: 0.75rem 1.5rem;
-        border-radius: 6px;
-        border: none;
-        font-weight: 600;
-        cursor: pointer;
-        text-decoration: none;
-        display: inline-block;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-primary {
-        background: #667eea;
-        color: white;
-    }
-    
-    .btn-primary:hover {
-        background: #5568d3;
-        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    }
-    
-    .btn-ghost {
-        background: transparent;
-        color: #667eea;
-        border: 1px solid #667eea;
-    }
-    
-    .btn-ghost:hover {
-        background: #f0f2ff;
-    }
-    
-    .grid-2col {
+    .form-row {
         display: grid;
-        grid-template-columns: 1fr 1fr;
+        grid-template-columns: 1fr 2fr;
         gap: 1rem;
     }
     
     @media (max-width: 768px) {
-        .grid-2col {
+        .form-row {
             grid-template-columns: 1fr;
         }
     }
+    
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 0.85rem 1.75rem;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+        display: inline-block;
+    }
+    
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 16px rgba(102, 126, 234, 0.3);
+    }
+    
+    .image-media {
+        max-width: 100%;
+        height: auto;
+        max-height: 300px;
+        border-radius: 8px;
+        margin: 1rem 0;
+    }
+    
+    .feedback-display {
+        background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+        border-left: 4px solid #2e7d32;
+        padding: 1rem;
+        border-radius: 8px;
+        margin-top: 1rem;
+    }
+    
+    .feedback-label {
+        font-size: 0.85rem;
+        color: #2e7d32;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .feedback-text {
+        color: #2e7d32;
+        line-height: 1.6;
+    }
 </style>
 
-<div class="container py-4">
-    <!-- Back Button -->
-    <a href="{{ url_for('teacher.results') }}" class="btn btn-ghost mb-4">
-        ← Quay lại danh sách bài làm
-    </a>
+<div class="detail-container">
+    <div class="detail-inner">
+        <!-- Back Button -->
+        <a href="{{ url_for('teacher.results') }}" class="back-btn">
+            ← Quay lại danh sách
+        </a>
 
-    <!-- Header -->
-    <div class="teacher-header">
-        <h1>📋 Chấm bài #{{ result.id }} - {{ result.quiz.title }}</h1>
-        <div class="summary-grid">
-            <div class="summary-item">
-                <span class="summary-label">Học sinh</span>
-                <span class="summary-value" style="font-size: 1rem;">{{ result.display_student_name }}</span>
-                <small style="display: block; margin-top: 0.25rem;">{{ result.display_student_email }}</small>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Điểm</span>
-                <span class="summary-value">{{ result.total_score }}/{{ result.max_score }}</span>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Tỷ lệ</span>
-                <span class="summary-value">{{ "%.1f"|format(result.score_percent) }}%</span>
-            </div>
-            <div class="summary-item">
-                <span class="summary-label">Trạng thái</span>
-                <span class="summary-value" style="font-size: 1rem;">
-                    {% if result.status == 'submitted' %}
-                        ⏳ Chờ chấm
-                    {% elif result.status == 'graded' %}
-                        ✓ Đã chấm
-                    {% else %}
-                        {{ result.status }}
-                    {% endif %}
-                </span>
+        <!-- Header Card -->
+        <div class="header-card">
+            <h1 class="header-title">📋 Chấm bài #{{ result.id }}</h1>
+            <div class="header-grid">
+                <div class="header-item">
+                    <span class="header-label">Bài kiểm tra</span>
+                    <span class="header-value" style="font-size: 1rem; font-weight: 600;">{{ result.quiz.title }}</span>
+                </div>
+                <div class="header-item">
+                    <span class="header-label">Học sinh</span>
+                    <span class="header-value" style="font-size: 1rem; font-weight: 600;">{{ result.display_student_name }}</span>
+                </div>
+                <div class="header-item">
+                    <span class="header-label">Điểm</span>
+                    <span class="header-value">{{ result.total_score }}/{{ result.max_score }}</span>
+                </div>
+                <div class="header-item">
+                    <span class="header-label">Tỷ lệ</span>
+                    <span class="header-value">{{ "%.1f"|format(result.score_percent) }}%</span>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Questions Detail -->
-    <div>
-        <h2 style="margin-bottom: 1.5rem; font-weight: bold;">📝 Chi tiết câu trả lời</h2>
-        
-        {% for answer in user_answers %}
-            <div class="question-card">
-                <div class="question-header">
-                    <div style="display: flex; align-items: center; gap: 1rem; justify-content: space-between;">
+        <!-- Questions Section -->
+        <div class="questions-card">
+            {% for answer in user_answers %}
+                <div class="question-item">
+                    <div class="q-header">
+                        <span class="q-number">{{ loop.index }}</span>
                         <div style="flex: 1;">
-                            <span class="question-number">Câu {{ loop.index }}</span>
-                            {% if answer.question.type != 'essay' %}
-                                <span class="result-badge {% if answer.is_correct %}badge-correct{% else %}badge-incorrect{% endif %}">
-                                    {% if answer.is_correct %}✓ Đúng{% else %}✗ Sai{% endif %}
-                                </span>
-                            {% endif %}
+                            <span style="color: #667eea; font-weight: 600;">{{ answer.question.type|upper }}</span>
                         </div>
                     </div>
-                    <p class="question-text" style="margin-top: 0.75rem;">{{ answer.question.text }}</p>
-                </div>
 
-                <div class="question-content">
+                    <p class="q-text">{{ answer.question.text }}</p>
+
+                    <!-- Media -->
+                    {% if answer.question.image_url %}
+                        <img src="{{ answer.question.image_url }}" alt="question-image" class="image-media">
+                    {% endif %}
+                    {% if answer.question.youtube_url %}
+                        <a href="{{ answer.question.youtube_url }}" target="_blank" style="display: inline-block; margin: 1rem 0; padding: 0.5rem 1rem; background: #f0f0f0; border-radius: 6px; text-decoration: none; color: #667eea; font-weight: 600;">▶ Xem video</a>
+                    {% endif %}
+
+                    <!-- Answer Content -->
                     {% if answer.question.type == 'essay' %}
                         <!-- Essay Answer -->
-                        <div class="answer-section">
-                            <label>Bài làm của học sinh:</label>
-                            <div class="essay-content">{{ answer.essay_answer or '(Không có câu trả lời)' }}</div>
+                        <div class="answer-display">
+                            <div class="answer-label">Bài làm của học sinh</div>
+                            <div class="essay-box">{{ answer.essay_answer or '(Trống)' }}</div>
                         </div>
-                        
+
                         {% if answer.essay_image_url %}
-                            <div class="answer-section">
-                                <label>📎 Ảnh đính kèm:</label>
-                                <a href="{{ answer.essay_image_url }}" target="_blank" class="btn btn-primary">Xem ảnh</a>
+                            <div class="answer-display">
+                                <div class="answer-label">Ảnh đính kèm</div>
+                                <a href="{{ answer.essay_image_url }}" target="_blank" style="color: #667eea; font-weight: 600;">📸 Xem ảnh</a>
                             </div>
                         {% endif %}
 
-                        <!-- Grading Form -->
-                        <div class="grading-form">
-                            <h4>✏️ Chấm bài tự luận</h4>
+                        <!-- Grading Form for Essay -->
+                        <div class="grading-section">
+                            <h3 class="grading-title">✏️ Chấm bài tự luận</h3>
                             <form method="POST" action="{{ url_for('teacher.grade_essay', result_id=result.id, answer_id=answer.id) }}">
                                 {{ grading_forms[answer.id].hidden_tag() }}
                                 
-                                <div class="grid-2col">
+                                <div class="form-row">
                                     <div class="form-group">
-                                        <label for="score_{{ answer.id }}">Điểm chấm</label>
+                                        <label class="form-label" for="score_{{ answer.id }}">Điểm chấm</label>
                                         {{ grading_forms[answer.id].score_awarded(id="score_" + answer.id|string, class="form-control", value=answer.score_awarded or '', placeholder="VD: 8.5") }}
                                     </div>
-                                    <div style="display: none;">
-                                        <!-- Hidden field for form validation -->
+                                    <div class="form-group">
+                                        <label class="form-label" for="feedback_{{ answer.id }}">Nhận xét / Phản hồi</label>
+                                        {{ grading_forms[answer.id].feedback(id="feedback_" + answer.id|string, class="form-control", rows="2", placeholder="Nhập nhận xét...") }}
                                     </div>
                                 </div>
                                 
-                                <div class="form-group">
-                                    <label for="feedback_{{ answer.id }}">Nhận xét / Phản hồi</label>
-                                    {{ grading_forms[answer.id].feedback(id="feedback_" + answer.id|string, class="form-control", rows="3", placeholder="Nhập nhận xét cho bài làm này...") }}
-                                </div>
-                                
-                                <div class="button-group">
-                                    <button class="btn btn-primary" type="submit">
-                                        💾 Lưu chấm điểm
-                                    </button>
-                                </div>
+                                <button class="btn-submit" type="submit">💾 Lưu chấm điểm</button>
                             </form>
                         </div>
-                    {% else %}
-                        <!-- Multiple Choice Answer -->
-                        <div class="answer-section">
-                            <label>Đáp án đã chọn:</label>
-                            <div style="padding: 0.75rem; background: white; border-left: 3px solid #667eea; border-radius: 6px;">
-                                <strong>{{ answer.option.label if answer.option else '(Không chọn)' }}</strong>
+
+                        <!-- Show existing feedback if any -->
+                        {% if answer.feedback %}
+                            <div class="feedback-display">
+                                <div class="feedback-label">💬 Phản hồi hiện tại</div>
+                                <div class="feedback-text">{{ answer.feedback }}</div>
                             </div>
+                        {% endif %}
+
+                    {% else %}
+                        <!-- Multiple Choice -->
+                        {% set selected_labels = [] %}
+                        {% if answer.option %}
+                            {% set _ = selected_labels.append(answer.option.label) %}
+                        {% elif answer.essay_answer %}
+                            {% for raw_id in answer.essay_answer.split(',') %}
+                                {% set opt = answer.question.options.filter_by(id=raw_id|int).first() %}
+                                {% if opt %}
+                                    {% set _ = selected_labels.append(opt.label) %}
+                                {% endif %}
+                            {% endfor %}
+                        {% endif %}
+
+                        <div class="answer-display">
+                            <div class="answer-label">Đáp án đã chọn</div>
+                            <div class="answer-text">{{ selected_labels|join(', ') if selected_labels else '(Không chọn)' }}</div>
                         </div>
-                        
+
                         {% if answer.question.get_explanation() %}
-                            <div class="answer-section" style="background: #f0f7ff; border-left: 3px solid #0066cc;">
-                                <label>📖 Giải thích:</label>
-                                <p style="margin: 0; color: #0066cc;">{{ answer.question.get_explanation() }}</p>
+                            <div class="answer-display" style="background: #f0f7ff; border-left-color: #0066cc;">
+                                <div class="answer-label" style="color: #0066cc;">📖 Giải thích</div>
+                                <div class="answer-text" style="color: #0066cc;">{{ answer.question.get_explanation() }}</div>
                             </div>
                         {% endif %}
                     {% endif %}
                 </div>
-            </div>
-        {% endfor %}
+            {% endfor %}
+        </div>
     </div>
 </div>
 
